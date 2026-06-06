@@ -125,6 +125,16 @@ img.av{object-fit:cover;object-position:top center}
 .feat span{font-family:var(--mono);font-size:10.5px;padding:6px 11px;border:1px solid var(--line);border-radius:10px;color:var(--dim)}
 .foot{text-align:center;margin-top:36px;font-family:var(--disp);font-size:20px;letter-spacing:.5px;color:var(--dim2)}
 @media(max-width:520px){.chat{height:460px}.tab .sub{display:none}}
+.heroChars{display:flex;justify-content:center;gap:22px;margin:20px 0 4px;flex-wrap:wrap}
+.heroChars figure{display:flex;flex-direction:column;align-items:center;gap:6px}
+.heroChars img{height:190px;width:auto;object-fit:contain;filter:drop-shadow(0 12px 26px #7b2dff55)}
+.heroChars figcaption{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim)}
+@media(max-width:520px){.heroChars img{height:128px}}
+.credits{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:#150b29;flex-wrap:wrap}
+.credits .bj{font-family:var(--mono);font-size:11px;color:var(--dim)}
+.credits .bj b{color:var(--acid)}.credits .stop{color:var(--dim2)}
+.credits button{font-family:var(--disp);font-size:15px;letter-spacing:.5px;padding:7px 14px;border-radius:11px;border:1px solid var(--line2);background:#ffffff08;color:var(--violet);cursor:pointer}
+.credits button:hover{border-color:var(--mojak);color:#fff}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -146,6 +156,7 @@ img.av{object-fit:cover;object-position:top center}
     <span class="tag">two feels · one ai</span>
     <h2><span class="d">DOOMER</span> when you're down.<br><span class="b">BLOOMER</span> when you're back.</h2>
     <p>Two AI models with the Mojak soul. One copes with you through the trenches. One actually builds the bag back. Spin yours up — talk here or plug it into your own Telegram.</p>
+    <div class="heroChars"><figure><img src="assets/doomer.png?v=3" alt="Doomer"/><figcaption>Doomer · cope</figcaption></figure><figure><img src="assets/bloomer.png?v=3" alt="Bloomer"/><figcaption>Bloomer · build</figcaption></figure></div>
   </div>
 
   <div class="tabs">
@@ -186,7 +197,7 @@ img.av{object-fit:cover;object-position:top center}
         <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">doomer.chat — preview</span></div>
         <div class="chat">
           <div class="who">
-            <img class="av" id="dAv" src="assets/doomer.png" alt="Doomer"/>
+            <img class="av" id="dAv" src="assets/doomer.png?v=3" alt="Doomer"/>
             <div><div class="nm" id="dName">Coposeidon</div><div class="st"><span class="live"></span> online · ready to cope</div></div>
           </div>
           <div class="stream" id="dStream"><div class="msg bot dm">yo. what'd the market do to you today 😮‍💨</div></div>
@@ -203,16 +214,17 @@ img.av{object-fit:cover;object-position:top center}
       <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">bloomer.chat — we're so back</span></div>
       <div class="chat" style="height:560px">
         <div class="who">
-          <img class="av bl" src="assets/bloomer.png" alt="Bloomer"/>
+          <img class="av bl" src="assets/bloomer.png?v=3" alt="Bloomer"/>
           <div><div class="nm">BLOOMER</div><div class="st bl"><span class="live bl"></span> big brain mode · we're gonna make it</div></div>
         </div>
         <div class="stream" id="bStream"><div class="msg bot">aight enough crying. i'm the one that actually builds. code, plans, art, bots, hype — what are we shipping? 🚀</div></div>
+        <div class="credits"><span class="bj">credits <b id="credBal">$0.00</b> <span class="stop">· billed in MON at live rate · stops at $0, no overspend</span></span><button onclick="topUp()">+ top up</button></div>
         <div class="qa">
-          <button class="qchip" onclick="quick('code')">⌨️ Write code <span class="c">≈2 MON</span></button>
-          <button class="qchip" onclick="quick('plan')">🧠 Make a plan <span class="c">≈1 MON</span></button>
-          <button class="qchip" onclick="quick('art')">🎨 Memes / art <span class="c">≈1 MON</span></button>
-          <button class="qchip" onclick="quick('bot')">🤖 Build a bot <span class="c">≈2 MON</span></button>
-          <button class="qchip" onclick="quick('hype')">📣 Hype me up <span class="c">≈0.2 MON</span></button>
+          <button class="qchip" onclick="quick('code')">⌨️ Write code <span class="c">$0.05</span></button>
+          <button class="qchip" onclick="quick('plan')">🧠 Make a plan <span class="c">$0.03</span></button>
+          <button class="qchip" onclick="quick('art')">🎨 Memes / art <span class="c">$0.04</span></button>
+          <button class="qchip" onclick="quick('bot')">🤖 Build a bot <span class="c">$0.05</span></button>
+          <button class="qchip" onclick="quick('hype')">📣 Hype me up <span class="c">$0.01</span></button>
         </div>
         <div class="inbar"><input id="bIn" placeholder="tell bloomer what to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="send" onclick="sendBloom()">➤</button></div>
         <div class="disc"><b>⚠ Tool, not a crutch.</b> Bloomer's smart but not perfect — review and test anything before you ship it. You're responsible for what you do with it.</div>
@@ -277,11 +289,11 @@ function sendBloom(){const i=bIn,v=i.value.trim();if(!v)return;i.value='';add(bS
   else if(/hype|down bad|motivat|cope.*back|believe/.test(x))k='hype';
   typing(bStream,()=>bAns(k,v));}
 function bAns(k){let html,cost,meta;
-  if(k==='code'){html="say less. we're so back 🚀<pre>function flip(){\n  return Math.random()<0.5 ? 'heads 🟢' : 'tails 🔴';\n}\nconsole.log(flip());</pre>want it as a full TG command or a webpage? i can build either.";cost='≈ 2 MON · codegen';meta='tool not a crutch — test before you ship';}
-  else if(k==='plan'){html="here's the move 🧠<pre>1. lock socials (X + TG) same handle\n2. fair-launch on the curve, no presale\n3. seed 60 memes pre-launch, drip them\n4. tools page live day 1 (you = credible)\n5. buy/burn loop wired to volume\n6. don't sell. you are him.</pre>want me to expand any step?";cost='≈ 1 MON · plan';}
-  else if(k==='art'){html="🎨 cooking 4 cope memes — feels-guy-in-the-trenches set, your ticker on each. (image gen runs on the paid tier; demo here so picture 4 absolute bangers.)";cost='≈ 1 MON · 4 images';}
-  else if(k==='bot'){html="🤖 i'll generate a ready-to-run buybot — RPC, pair, buy-threshold, TG post, all wired. i hand you the files + exact run steps, you drop in your bot token and deploy. PM2 or Docker?";cost='≈ 2 MON · build';meta='you review + run it — your keys, your box';}
-  else if(k==='hype'){html="listen to me. you are not down bad, you are EARLY to your own comeback. the chart is a liar and you are a legend in a dip. go drink water, touch grass, and WAGMI. 📣 we're so back.";cost='≈ 0.2 MON';}
+  if(k==='code'){html="say less. we're so back 🚀<pre>function flip(){\n  return Math.random()<0.5 ? 'heads 🟢' : 'tails 🔴';\n}\nconsole.log(flip());</pre>want it as a full TG command or a webpage? i can build either.";cost='≈ $0.05 · codegen';meta='tool not a crutch — test before you ship';}
+  else if(k==='plan'){html="here's the move 🧠<pre>1. lock socials (X + TG) same handle\n2. fair-launch on the curve, no presale\n3. seed 60 memes pre-launch, drip them\n4. tools page live day 1 (you = credible)\n5. buy/burn loop wired to volume\n6. don't sell. you are him.</pre>want me to expand any step?";cost='≈ $0.03 · plan';}
+  else if(k==='art'){html="🎨 cooking 4 cope memes — feels-guy-in-the-trenches set, your ticker on each. (image gen runs on the paid tier; demo here so picture 4 absolute bangers.)";cost='≈ $0.04 · 4 images';}
+  else if(k==='bot'){html="🤖 i'll generate a ready-to-run buybot — RPC, pair, buy-threshold, TG post, all wired. i hand you the files + exact run steps, you drop in your bot token and deploy. PM2 or Docker?";cost='≈ $0.05 · build';meta='you review + run it — your keys, your box';}
+  else if(k==='hype'){html="listen to me. you are not down bad, you are EARLY to your own comeback. the chart is a liar and you are a legend in a dip. go drink water, touch grass, and WAGMI. 📣 we're so back.";cost='≈ $0.01';}
   else{html="i can write code, make a plan, cook memes, build a bot, or just hype you up. what're we shipping? 🚀";cost='';}
   const m=document.createElement('div');m.className='msg bot';m.innerHTML=html;
   if(cost){const c=document.createElement('div');c.className='cost';c.textContent='🪙 '+cost;m.appendChild(c);}
@@ -290,6 +302,17 @@ function bAns(k){let html,cost,meta;
 
 function add(s,c,t){const m=document.createElement('div');m.className='msg '+c;m.textContent=t;s.appendChild(m);s.scrollTop=s.scrollHeight;}
 function typing(s,done){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';s.appendChild(t);s.scrollTop=s.scrollHeight;setTimeout(()=>{t.remove();done();},650+Math.random()*450);}
+</script>
+<script>
+window.sendDoom=async function(){const i=document.getElementById('dIn'),v=i.value.trim();if(!v)return;i.value='';add(dStream,'me',v);
+ const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';dStream.appendChild(t);dStream.scrollTop=dStream.scrollHeight;
+ try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'doomer',messages:[{role:'user',content:v}]})});
+  if(!res.ok)throw 0;const j=await res.json();t.remove();
+  if(j.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML=j.reply;dStream.appendChild(m);}else add(dStream,'bot dm',j.reply||'...');
+  dStream.scrollTop=dStream.scrollHeight;
+ }catch(e){t.remove();const r=dReply(v);if(r&&r.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML="hey — for real, if you're going through something heavy please reach out: call or text <b>988</b>, text <b>HOME to 741741</b>, or <b>findahelpline.com</b>. you matter way more than any chart. ❤️";dStream.appendChild(m);}else add(dStream,'bot dm',r);dStream.scrollTop=dStream.scrollHeight;}
+};
+window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet, then send MON to the treasury — your balance loads automatically once the deposit confirms on-chain. when credits hit $0 i stop until you top up (no overspend). 💳');bStream.scrollTop=bStream.scrollHeight;};
 </script>
 </body>
 </html>

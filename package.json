@@ -1,0 +1,6 @@
+{
+  "name": "mojak-ai",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18" }
+}
