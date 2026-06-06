@@ -26,3 +26,18 @@ export async function chatLLM({ tier, messages, maxTokens }) {
   const j = await res.json();
   return (j.choices?.[0]?.message?.content || '').trim();
 }
+
+export async function genImage({ prompt, n = 1 }) {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw new Error('OPENAI_API_KEY not set');
+  const model = process.env.IMAGE_MODEL || 'gpt-image-1-mini';
+  const quality = process.env.IMAGE_QUALITY || 'medium';
+  const res = await fetch('https://api.openai.com/v1/images/generations', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, prompt: String(prompt).slice(0, 1000), n: Math.min(n || 1, 2), size: '1024x1024', quality }),
+  });
+  if (!res.ok) throw new Error('image ' + res.status + ' ' + (await res.text()).slice(0, 180));
+  const j = await res.json();
+  return (j.data || []).map(d => d.b64_json ? ('data:image/png;base64,' + d.b64_json) : d.url).filter(Boolean);
+}

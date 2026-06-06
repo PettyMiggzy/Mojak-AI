@@ -23,10 +23,10 @@ export function buildDoomerSystem(persona) {
 
 // USD-pegged action prices + hard output-token caps. cost charged BEFORE the model runs.
 export const ACTIONS = {
-  chat: { usd: 0.02, max: 900 },
-  code: { usd: 0.05, max: 2000 },
-  plan: { usd: 0.03, max: 1400 },
-  bot:  { usd: 0.05, max: 2400 },
-  art:  { usd: 0.04, max: 300 },
-  hype: { usd: 0.01, max: 300 },
+  chat: { usd: 0.05, max: 900 },
+  code: { usd: 0.20, max: 2000 },
+  plan: { usd: 0.10, max: 1400 },
+  bot:  { usd: 0.25, max: 2400 },
+  art:  { usd: 0.10, image: true, n: 1 },
+  hype: { usd: 0.05, max: 300 },
 };

@@ -1,7 +1,7 @@
 import { cors, originOk, clientIp } from './_lib/cors.js';
 import { rateLimit, debitBalance, creditBalance, getBalance } from './_lib/store.js';
 import { crisisCheck } from './_lib/crisis.js';
-import { chatLLM } from './_lib/llm.js';
+import { chatLLM, genImage } from './_lib/llm.js';
 import { DOOMER_SYS, BLOOMER_SYS, ACTIONS } from './_lib/prompts.js';
 
 const isAddr = (a) => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a);
@@ -42,6 +42,10 @@ export default async function handler(req, res) {
       if (!(await debitBalance(wallet, micro)))
         return res.status(402).json({ error: 'insufficient balance', needUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
       try {
+        if (spec.image) {
+          const images = await genImage({ prompt: (lastUser?.content || 'a funny purple wojak cope meme'), n: spec.n || 1 });
+          return res.status(200).json({ images, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
+        }
         const reply = await chatLLM({ tier, maxTokens: spec.max, messages: [{ role: 'system', content: BLOOMER_SYS }, ...msgs] });
         return res.status(200).json({ reply, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
       } catch (e) {
