@@ -1,0 +1,62 @@
+import { cors, originOk, clientIp } from './_lib/cors.js';
+import { rateLimit, debitBalance, creditBalance, getBalance } from './_lib/store.js';
+import { crisisCheck } from './_lib/crisis.js';
+import { chatLLM } from './_lib/llm.js';
+import { DOOMER_SYS, BLOOMER_SYS, ACTIONS } from './_lib/prompts.js';
+
+const isAddr = (a) => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a);
+
+function clean(messages) {
+  if (!Array.isArray(messages)) return [];
+  return messages
+    .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+    .slice(-12)
+    .map(m => ({ role: m.role, content: m.content.slice(0, 4000) }));
+}
+
+export default async function handler(req, res) {
+  if (cors(req, res)) return;
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
+  if (!originOk(req)) return res.status(403).json({ error: 'forbidden origin' });
+
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+  const { tier, action, wallet, messages } = body || {};
+  const msgs = clean(messages);
+  if (!msgs.length) return res.status(400).json({ error: 'no messages' });
+  const lastUser = [...msgs].reverse().find(m => m.role === 'user');
+
+  // crisis tripwire on the latest user message (both tiers)
+  if (lastUser) {
+    const c = await crisisCheck(lastUser.content);
+    if (c.crisis) return res.status(200).json({ crisis: true, reply: c.reply });
+  }
+
+  try {
+    if (tier === 'bloomer') {
+      if (!isAddr(wallet)) return res.status(400).json({ error: 'wallet required for bloomer' });
+      const rl = await rateLimit('b:' + wallet, 30, 30 / 60);
+      if (!rl.allowed) return res.status(429).json({ error: 'rate limited' });
+      const spec = ACTIONS[action] || ACTIONS.chat;
+      const micro = Math.round(spec.usd * 1e6);
+      if (!(await debitBalance(wallet, micro)))
+        return res.status(402).json({ error: 'insufficient balance', needUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
+      try {
+        const reply = await chatLLM({ tier, maxTokens: spec.max, messages: [{ role: 'system', content: BLOOMER_SYS }, ...msgs] });
+        return res.status(200).json({ reply, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
+      } catch (e) {
+        await creditBalance(wallet, micro); // refund on failure
+        throw e;
+      }
+    }
+
+    // default: doomer — free, rate limited per wallet|ip
+    const id = isAddr(wallet) ? wallet : clientIp(req);
+    const rl = await rateLimit('d:' + id, 20, 20 / 60);
+    if (!rl.allowed) return res.status(429).json({ error: 'slow down a sec', remaining: rl.remaining });
+    const reply = await chatLLM({ tier: 'doomer', maxTokens: 350, messages: [{ role: 'system', content: DOOMER_SYS }, ...msgs] });
+    return res.status(200).json({ reply });
+  } catch (e) {
+    return res.status(502).json({ error: 'model error', detail: String(e.message || e).slice(0, 200) });
+  }
+}

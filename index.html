@@ -291,5 +291,15 @@ function bAns(k){let html,cost,meta;
 function add(s,c,t){const m=document.createElement('div');m.className='msg '+c;m.textContent=t;s.appendChild(m);s.scrollTop=s.scrollHeight;}
 function typing(s,done){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';s.appendChild(t);s.scrollTop=s.scrollHeight;setTimeout(()=>{t.remove();done();},650+Math.random()*450);}
 </script>
+<script>
+window.sendDoom=async function(){const i=document.getElementById('dIn'),v=i.value.trim();if(!v)return;i.value='';add(dStream,'me',v);
+ const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';dStream.appendChild(t);dStream.scrollTop=dStream.scrollHeight;
+ try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'doomer',messages:[{role:'user',content:v}]})});
+  if(!res.ok)throw 0;const j=await res.json();t.remove();
+  if(j.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML=j.reply;dStream.appendChild(m);}else add(dStream,'bot dm',j.reply||'...');
+  dStream.scrollTop=dStream.scrollHeight;
+ }catch(e){t.remove();const r=dReply(v);if(r&&r.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML="hey — for real, if you're going through something heavy please reach out: call or text <b>988</b>, text <b>HOME to 741741</b>, or <b>findahelpline.com</b>. you matter way more than any chart. ❤️";dStream.appendChild(m);}else add(dStream,'bot dm',r);dStream.scrollTop=dStream.scrollHeight;}
+};
+</script>
 </body>
 </html>
