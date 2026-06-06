@@ -110,3 +110,29 @@ export async function kvSet(key, val, ttlSec) {
   if (useRedis) return r(ttlSec ? ['SET', key, val, 'EX', ttlSec] : ['SET', key, val]);
   mem.set('kv:' + key, { v: val, exp: ttlSec ? now() + ttlSec : 0 });
 }
+
+
+const STAT = (k) => 'stat:' + k;
+export async function track({ revenueMicro = 0, costMicro = 0, tier = 'bloomer', action = 'chat' } = {}) {
+  const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const ops = [['calls', 1], ['calls:' + tier + ':' + action, 1]];
+  if (revenueMicro) ops.push(['rev', revenueMicro], ['rev:' + day, revenueMicro]);
+  if (costMicro) ops.push(['cost', costMicro], ['cost:' + day, costMicro]);
+  if (useRedis) { await Promise.all(ops.map(([k, v]) => r(['INCRBY', STAT(k), v]))); }
+  else { for (const [k, v] of ops) { const kk = STAT(k); mem.set(kk, (mem.get(kk) || 0) + v); } }
+}
+async function statGet(k) {
+  const kk = STAT(k);
+  if (useRedis) return Number((await r(['GET', kk])) || 0);
+  return mem.get(kk) || 0;
+}
+export async function getStats() {
+  const t0 = Date.now();
+  const days = [...Array(7)].map((_, i) => new Date(t0 - i * 864e5).toISOString().slice(0, 10).replace(/-/g, ''));
+  const [rev, cost, calls] = await Promise.all([statGet('rev'), statGet('cost'), statGet('calls')]);
+  const daily = [];
+  for (const d of days) { const [rv, ct] = await Promise.all([statGet('rev:' + d), statGet('cost:' + d)]); daily.push({ day: d, revenueUsd: rv / 1e6, costUsd: ct / 1e6, marginUsd: (rv - ct) / 1e6 }); }
+  const actions = {};
+  for (const t of ['bloomer', 'doomer']) for (const a of ['chat', 'code', 'plan', 'bot', 'art', 'hype', 'tg']) { const c = await statGet('calls:' + t + ':' + a); if (c) actions[t + ':' + a] = c; }
+  return { totals: { revenueUsd: rev / 1e6, costUsd: cost / 1e6, marginUsd: (rev - cost) / 1e6, calls }, daily, actions };
+}

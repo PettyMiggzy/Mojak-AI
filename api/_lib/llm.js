@@ -24,7 +24,7 @@ export async function chatLLM({ tier, messages, maxTokens }) {
   });
   if (!res.ok) throw new Error('LLM ' + res.status + ' ' + (await res.text()).slice(0, 180));
   const j = await res.json();
-  return (j.choices?.[0]?.message?.content || '').trim();
+  return { text: (j.choices?.[0]?.message?.content || '').trim(), usage: j.usage || {}, model };
 }
 
 export async function genImage({ prompt, n = 1 }) {
@@ -39,5 +39,6 @@ export async function genImage({ prompt, n = 1 }) {
   });
   if (!res.ok) throw new Error('image ' + res.status + ' ' + (await res.text()).slice(0, 180));
   const j = await res.json();
-  return (j.data || []).map(d => d.b64_json ? ('data:image/png;base64,' + d.b64_json) : d.url).filter(Boolean);
+  const images = (j.data || []).map(d => d.b64_json ? ('data:image/png;base64,' + d.b64_json) : d.url).filter(Boolean);
+  return { images, model, n: images.length };
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>MOJAK AI — Pricing & Docs</title>
+<link rel="icon" type="image/png" href="assets/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{--bg:#0b0614;--bg2:#120a22;--panel:#160c28;--mojak:#9d4dff;--mojak2:#7b2dff;--violet:#b985ff;--hot:#ff48c4;--acid:#c6ff4d;--ink:#f3ecff;--dim:#9b86c9;--dim2:#6f6196;--line:rgba(157,77,255,.22);--line2:rgba(157,77,255,.4);--radius:24px;--disp:'Boogaloo',cursive;--body:'Outfit',sans-serif;--mono:ui-monospace,monospace}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:var(--body);font-weight:300;background:var(--bg);color:var(--ink);min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;background-image:radial-gradient(circle at 20% 10%,#7b2dff33,transparent 45%),radial-gradient(circle at 80% 80%,#ff48c422,transparent 45%)}
+.wrap{position:relative;z-index:2;max-width:760px;margin:0 auto;padding:26px 20px 80px}
+.top{display:flex;align-items:center;gap:11px;margin-bottom:8px}
+.top img{width:42px;height:42px;border-radius:13px;background:#1a0f30;object-fit:contain;padding:3px;border:1px solid #ffffff22}
+.top h1{font-family:var(--disp);font-size:30px;letter-spacing:.5px}.top .ai{color:var(--acid)}
+a.back{font-family:var(--mono);font-size:12px;color:var(--violet);text-decoration:none;margin-left:auto}
+h2{font-family:var(--disp);font-size:30px;letter-spacing:.5px;margin:30px 0 6px}
+h2 .d{color:var(--acid)}h2 .b{color:var(--hot)}
+p{color:var(--dim);line-height:1.6;font-size:15px;margin:6px 0}
+p b{color:var(--violet);font-weight:600}
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);padding:22px;margin:16px 0}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-size:15px}
+th{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dim2)}
+td.p{font-family:var(--mono);color:var(--acid);text-align:right;white-space:nowrap}
+td.a{font-weight:600}
+.note{font-family:var(--mono);font-size:11px;color:var(--dim2);margin-top:12px;line-height:1.6}
+.step{display:flex;gap:11px;margin:12px 0;align-items:flex-start}
+.step .n{flex-shrink:0;width:26px;height:26px;border-radius:9px;background:#1d1138;border:1px solid var(--line2);display:grid;place-items:center;font-family:var(--disp);color:var(--violet);font-size:15px}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;color:var(--acid);border:1px solid var(--line2);border-radius:999px;padding:4px 11px;margin-top:4px}
+.foot{text-align:center;margin-top:40px;font-family:var(--disp);font-size:18px;color:var(--dim2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <img src="assets/logo.png" alt="Mojak"/>
+    <h1>MOJAK <span class="ai">AI</span></h1>
+    <a class="back" href="/">← back</a>
+  </div>
+  <p>Pricing &amp; how it works. Two models, two ways to pay.</p>
+
+  <h2><span class="d">DOOMER</span> · cope</h2>
+  <div class="card">
+    <p>The cope buddy. <b>Free to chat</b> on the web. Want your own — living in your Telegram DMs, your name, your face? <b>Burn 5,000 $MOJAK</b> once to deploy it.</p>
+    <span class="pill">web chat: free</span> <span class="pill">your own TG bot: burn 5,000 $MOJAK</span>
+  </div>
+
+  <h2><span class="b">BLOOMER</span> · build</h2>
+  <div class="card">
+    <p>The builder. Pay-as-you-go from a credit balance you load with $MON. You're only charged when it actually does something.</p>
+    <table>
+      <tr><th>What it does</th><th></th></tr>
+      <tr><td class="a">Hype me up</td><td class="p">$0.05</td></tr>
+      <tr><td class="a">Chat / freeform</td><td class="p">$0.05</td></tr>
+      <tr><td class="a">Make a plan</td><td class="p">$0.10</td></tr>
+      <tr><td class="a">Meme image</td><td class="p">$0.10</td></tr>
+      <tr><td class="a">Write code</td><td class="p">$0.20</td></tr>
+      <tr><td class="a">Build a bot</td><td class="p">$0.25</td></tr>
+    </table>
+    <p class="note">Prices are in USD and charged in $MON at the live rate at request time. You're charged <b>before</b> each action runs, and capped — when your balance hits $0, Bloomer pauses until you top up. No surprise bills, no overspend.</p>
+  </div>
+
+  <h2>How credits work</h2>
+  <div class="card">
+    <div class="step"><span class="n">1</span><p>Connect your wallet and send $MON to the Mojak AI treasury.</p></div>
+    <div class="step"><span class="n">2</span><p>Your deposit is verified on-chain and loaded as USD-pegged credits — so a $MON pump or dump never changes what an action costs.</p></div>
+    <div class="step"><span class="n">3</span><p>Use Bloomer. Each action draws down your balance. It stops automatically at $0.</p></div>
+    <p class="note">A slice of every action funds the $MOJAK buyback &amp; burn.</p>
+  </div>
+
+  <div class="foot">DOOMER &amp; BLOOMER · MOJAK AI</div>
+</div>
+</body>
+</html>

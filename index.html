@@ -206,7 +206,7 @@ img.av{object-fit:cover;object-position:top center}
         </div>
       </div>
     </div>
-    <div class="note"><span class="demo">◆ live demo — replies simulated client-side</span><br>real doomer runs on a cheap model · talks trades &amp; trench pain · if anyone's in real crisis it drops the bit and points to help.</div>
+    <div class="note"><span class="demo">◆ live demo — replies simulated client-side</span><br>real doomer runs lean · talks trades &amp; trench pain · if anyone's in real crisis it drops the bit and points to help.</div>
   </div>
 
   <!-- ============ BLOOMER ============ -->
@@ -219,19 +219,19 @@ img.av{object-fit:cover;object-position:top center}
           <div><div class="nm">BLOOMER</div><div class="st bl"><span class="live bl"></span> big brain mode · we're gonna make it</div></div>
         </div>
         <div class="stream" id="bStream"><div class="msg bot">aight enough crying. i'm the one that actually builds. code, plans, art, bots, hype — what are we shipping? 🚀</div></div>
-        <div class="credits"><span class="bj">credits <b id="credBal">$0.00</b> <span class="stop">· billed in MON at live rate · stops at $0, no overspend</span></span><button onclick="topUp()">+ top up</button></div>
+        <div class="credits"><span class="bj">credits <b id="credBal">$0.00</b> <span class="stop">· stops at $0, no overspend · <a href="docs.html" style="color:var(--violet);text-decoration:none">pricing →</a></span></span><button onclick="topUp()">+ top up</button></div>
         <div class="qa">
-          <button class="qchip" onclick="quick('code')">⌨️ Write code <span class="c">$0.20</span></button>
-          <button class="qchip" onclick="quick('plan')">🧠 Make a plan <span class="c">$0.10</span></button>
-          <button class="qchip" onclick="quick('art')">🎨 Meme image <span class="c">$0.10</span></button>
-          <button class="qchip" onclick="quick('bot')">🤖 Build a bot <span class="c">$0.25</span></button>
-          <button class="qchip" onclick="quick('hype')">📣 Hype me up <span class="c">$0.05</span></button>
+          <button class="qchip" onclick="quick('code')">⌨️ Write code</button>
+          <button class="qchip" onclick="quick('plan')">🧠 Make a plan</button>
+          <button class="qchip" onclick="quick('art')">🎨 Meme image</button>
+          <button class="qchip" onclick="quick('bot')">🤖 Build a bot</button>
+          <button class="qchip" onclick="quick('hype')">📣 Hype me up</button>
         </div>
         <div class="inbar"><input id="bIn" placeholder="tell bloomer what to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="send" onclick="sendBloom()">➤</button></div>
         <div class="disc"><b>⚠ Tool, not a crutch.</b> Bloomer's smart but not perfect — review and test anything before you ship it. You're responsible for what you do with it.</div>
       </div>
     </div>
-    <div class="feat"><span>runs on a real model (GPT-class)</span><span>metered in MON · charge-before-act</span><span>margin buys + burns $MOJAK</span></div>
+    <div class="feat"><span>frontier-grade build model</span><span>pay-as-you-go in $MON</span><span>fuels $MOJAK buyback &amp; burn</span></div>
     <div class="note"><span class="demo">◆ live demo — replies simulated</span></div>
   </div>
 
@@ -292,12 +292,11 @@ function sendBloom(){const i=bIn,v=i.value.trim();if(!v)return;i.value='';add(bS
 function bAns(k){let html,cost,meta;
   if(k==='code'){html="say less. we're so back 🚀<pre>function flip(){\n  return Math.random()<0.5 ? 'heads 🟢' : 'tails 🔴';\n}\nconsole.log(flip());</pre>want it as a full TG command or a webpage? i can build either.";cost='≈ $0.20 · codegen';meta='tool not a crutch — test before you ship';}
   else if(k==='plan'){html="here's the move 🧠<pre>1. lock socials (X + TG) same handle\n2. fair-launch on the curve, no presale\n3. seed 60 memes pre-launch, drip them\n4. tools page live day 1 (you = credible)\n5. buy/burn loop wired to volume\n6. don't sell. you are him.</pre>want me to expand any step?";cost='≈ $0.10 · plan';}
-  else if(k==='art'){html="🎨 cooking a cope meme — purple feels-guy with your ticker. real image gen on the paid tier (GPT Image); this is the demo.";cost='≈ $0.10 · 1 image';}
+  else if(k==='art'){html="🎨 cooking a cope meme — purple feels-guy with your ticker. real image generation on the paid tier; this is the demo.";cost='≈ $0.10 · 1 image';}
   else if(k==='bot'){html="🤖 i'll generate a ready-to-run buybot — RPC, pair, buy-threshold, TG post, all wired. i hand you the files + exact run steps, you drop in your bot token and deploy. PM2 or Docker?";cost='≈ $0.25 · build';meta='you review + run it — your keys, your box';}
   else if(k==='hype'){html="listen to me. you are not down bad, you are EARLY to your own comeback. the chart is a liar and you are a legend in a dip. go drink water, touch grass, and WAGMI. 📣 we're so back.";cost='≈ $0.05';}
   else{html="i can write code, make a plan, cook memes, build a bot, or just hype you up. what're we shipping? 🚀";cost='';}
   const m=document.createElement('div');m.className='msg bot';m.innerHTML=html;
-  if(cost){const c=document.createElement('div');c.className='cost';c.textContent='🪙 '+cost;m.appendChild(c);}
   if(meta){const mm=document.createElement('div');mm.className='meta';mm.textContent='⚠ '+meta;m.appendChild(mm);}
   bStream.appendChild(m);bStream.scrollTop=bStream.scrollHeight;}
 

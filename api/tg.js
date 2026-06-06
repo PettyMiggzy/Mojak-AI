@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 import { originOk } from './_lib/cors.js';
-import { rateLimit, isUnlocked, saveBot, getBot } from './_lib/store.js';
+import { rateLimit, isUnlocked, saveBot, getBot, track } from './_lib/store.js';
+import { textCostMicro } from './_lib/rates.js';
 import { crisisCheck } from './_lib/crisis.js';
 import { chatLLM } from './_lib/llm.js';
 import { buildDoomerSystem } from './_lib/prompts.js';
@@ -68,8 +69,9 @@ export default async function handler(req, res) {
     if (!rl.allowed) return res.status(200).json({ ok: true });
 
     let persona = {}; try { persona = JSON.parse(bot.persona || '{}'); } catch {}
-    const reply = await chatLLM({ tier: 'doomer', maxTokens: 350, messages: [{ role: 'system', content: buildDoomerSystem(persona) }, { role: 'user', content: text.slice(0, 2000) }] });
-    await tg(token, 'sendMessage', { chat_id: chatId, text: reply || '...' });
+    const out = await chatLLM({ tier: 'doomer', maxTokens: 350, messages: [{ role: 'system', content: buildDoomerSystem(persona) }, { role: 'user', content: text.slice(0, 2000) }] });
+    await track({ costMicro: textCostMicro(out.model, out.usage), tier: 'doomer', action: 'tg' });
+    await tg(token, 'sendMessage', { chat_id: chatId, text: out.text || '...' });
   } catch (e) {
     await tg(token, 'sendMessage', { chat_id: chatId, text: 'brain lagged, try again 😵‍💫' }).catch(() => {});
   }
