@@ -38,18 +38,20 @@ export default async function handler(req, res) {
       if (!isAddr(wallet)) return res.status(400).json({ error: 'wallet required for bloomer' });
       const rl = await rateLimit('b:' + wallet, 30, 30 / 60);
       if (!rl.allowed) return res.status(429).json({ error: 'rate limited' });
-      const spec = ACTIONS[action] || ACTIONS.chat;
+      const act = ACTIONS[action] ? action : 'chat';
+      const spec = ACTIONS[act];
       const micro = Math.round(spec.usd * 1e6);
       if (!(await debitBalance(wallet, micro)))
         return res.status(402).json({ error: 'insufficient balance', needUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
       try {
         if (spec.image) {
           const img = await genImage({ prompt: (lastUser?.content || 'a funny purple wojak cope meme'), n: spec.n || 1 });
+          if (!img.images?.length) throw new Error('no image produced'); // -> refund, never charge for nothing
           await track({ revenueMicro: micro, costMicro: imageCostMicro(img.model, img.n), tier: 'bloomer', action: 'art' });
           return res.status(200).json({ images: img.images, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
         }
         const out = await chatLLM({ tier, maxTokens: spec.max, messages: [{ role: 'system', content: BLOOMER_SYS }, ...msgs] });
-        await track({ revenueMicro: micro, costMicro: textCostMicro(out.model, out.usage), tier: 'bloomer', action });
+        await track({ revenueMicro: micro, costMicro: textCostMicro(out.model, out.usage), tier: 'bloomer', action: act });
         return res.status(200).json({ reply: out.text, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
       } catch (e) {
         await creditBalance(wallet, micro); // refund on failure
@@ -65,6 +67,9 @@ export default async function handler(req, res) {
     await track({ costMicro: textCostMicro(out.model, out.usage), tier: 'doomer', action: 'chat' });
     return res.status(200).json({ reply: out.text });
   } catch (e) {
-    return res.status(502).json({ error: 'model error', detail: String(e.message || e).slice(0, 200) });
+    // Log full detail server-side only. Never echo upstream error text to the
+    // client — it can reveal the model provider/identity (e.g. an OpenAI 401 body).
+    console.error('[chat] error:', String(e?.message || e));
+    return res.status(502).json({ error: 'model unavailable, try again in a moment' });
   }
 }

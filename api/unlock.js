@@ -1,6 +1,6 @@
 import { cors, originOk } from './_lib/cors.js';
 import { verifyErc20Transfer } from './_lib/chain.js';
-import { setUnlock, isUnlocked, seenTx } from './_lib/store.js';
+import { setUnlock, isUnlocked, seenTx, unseenTx } from './_lib/store.js';
 
 const MOJAK = process.env.MOJAK_TOKEN;
 const DEAD = process.env.DEAD_ADDR || '0x000000000000000000000000000000000000dEaD';
@@ -25,10 +25,18 @@ export default async function handler(req, res) {
       let body = req.body; if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
       const { wallet, txHash } = body || {};
       if (!isAddr(wallet)) return res.status(400).json({ error: 'bad wallet' });
-      if (await seenTx(txHash)) return res.status(409).json({ error: 'tx already used' });
+      // Verify the burn on-chain FIRST so a transient failure (RPC lag, not
+      // enough confirmations) can't consume the txHash and permanently lock out
+      // a user who really burned their MOJAK.
       const { from, amount } = await verifyErc20Transfer(txHash, MOJAK, DEAD, BURN);
       if (from !== wallet.toLowerCase()) return res.status(400).json({ error: 'burn sender != wallet' });
-      await setUnlock(wallet);
+      if (await seenTx(txHash)) return res.status(409).json({ error: 'tx already used' });
+      try {
+        await setUnlock(wallet);
+      } catch (e) {
+        await unseenTx(txHash).catch(() => {});
+        throw e;
+      }
       return res.status(200).json({ unlocked: true, burned: amount.toString() });
     }
 

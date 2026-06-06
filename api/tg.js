@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { originOk } from './_lib/cors.js';
+import { cors, originOk } from './_lib/cors.js';
 import { rateLimit, isUnlocked, saveBot, getBot, track } from './_lib/store.js';
 import { textCostMicro } from './_lib/rates.js';
 import { crisisCheck } from './_lib/crisis.js';
@@ -24,6 +24,9 @@ export default async function handler(req, res) {
 
   // ---- register a user's bot (called from the web, gated by burn-unlock) ----
   if (op === 'register') {
+    // Browser-called: handle CORS preflight + set allow-origin. (The webhook
+    // path below is server-to-server from Telegram and intentionally skips CORS.)
+    if (cors(req, res)) return;
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
     if (!originOk(req)) return res.status(403).json({ error: 'forbidden origin' });
     let body = req.body; if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
@@ -36,9 +39,15 @@ export default async function handler(req, res) {
     const me = await tg(botToken, 'getMe', {});
     if (!me.ok) return res.status(400).json({ error: 'token rejected by telegram' });
 
+    // Bound the owner-supplied persona before storing / injecting into the prompt.
+    const cleanPersona = {
+      name: String(persona?.name || '').slice(0, 40),
+      traits: Array.isArray(persona?.traits) ? persona.traits.slice(0, 8).map(t => String(t).slice(0, 40)) : [],
+    };
+
     const botId = crypto.randomBytes(12).toString('hex');
     const secret = crypto.randomBytes(24).toString('hex');
-    await saveBot(botId, { tokenEnc: encrypt(botToken), tier, secret, owner: wallet.toLowerCase(), persona: JSON.stringify(persona || {}) });
+    await saveBot(botId, { tokenEnc: encrypt(botToken), tier, secret, owner: wallet.toLowerCase(), persona: JSON.stringify(cleanPersona) });
     const wh = await tg(botToken, 'setWebhook', { url: `${base(req)}/api/tg?botId=${botId}`, secret_token: secret, drop_pending_updates: true });
     if (!wh.ok) return res.status(502).json({ error: 'setWebhook failed', detail: wh.description });
     return res.status(200).json({ ok: true, botId, botUsername: me.result?.username });

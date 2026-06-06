@@ -66,13 +66,23 @@ export async function getBalance(wallet) {
   return mem.get('bal:' + wallet) || 0;
 }
 
-// ---- tx dedupe (returns true if ALREADY seen) ----
+// ---- tx dedupe (atomic claim; returns true if ALREADY seen) ----
+// IMPORTANT: this marks the hash as used as a side effect. Only call it AFTER a
+// deposit/burn has been verified on-chain, immediately before crediting/unlocking.
+// If the follow-up action fails, call unseenTx() to release the hash for retry.
 export async function seenTx(hash) {
-  const h = hash.toLowerCase();
+  const h = String(hash).toLowerCase();
   if (useRedis) return (await r(['SADD', 'seen:tx', h])) === 0;
   const k = 'seen:tx';
   const set = mem.get(k) || new Set();
   const had = set.has(h); set.add(h); mem.set(k, set); return had;
+}
+// Release a hash claimed by seenTx (so a legitimate tx can be retried after a
+// transient failure between the dedupe claim and the credit/unlock write).
+export async function unseenTx(hash) {
+  const h = String(hash).toLowerCase();
+  if (useRedis) return r(['SREM', 'seen:tx', h]);
+  const set = mem.get('seen:tx'); if (set) set.delete(h);
 }
 
 // ---- doomer burn unlock ----

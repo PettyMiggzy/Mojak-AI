@@ -1,7 +1,7 @@
 import { cors, originOk } from './_lib/cors.js';
 import { monUsd } from './_lib/price.js';
 import { verifyNativeTransfer } from './_lib/chain.js';
-import { creditBalance, getBalance, seenTx } from './_lib/store.js';
+import { creditBalance, getBalance, seenTx, unseenTx } from './_lib/store.js';
 import { ACTIONS } from './_lib/prompts.js';
 
 const TREASURY = process.env.TREASURY_ADDR;
@@ -32,14 +32,24 @@ export default async function handler(req, res) {
       let body = req.body; if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
       const { wallet, txHash } = body || {};
       if (!isAddr(wallet)) return res.status(400).json({ error: 'bad wallet' });
-      if (await seenTx(txHash)) return res.status(409).json({ error: 'tx already credited' });
+      // Verify on-chain FIRST. A transient failure here (RPC lag, not enough
+      // confirmations, price fetch) must NOT consume the txHash, or the user
+      // could never re-credit a real deposit.
       const { from, value } = await verifyNativeTransfer(txHash, TREASURY, 1n);
       if (from !== wallet.toLowerCase()) return res.status(400).json({ error: 'tx sender != wallet' });
       const { usd } = await monUsd();
       const monAmt = Number(value) / 1e18;
       const micro = Math.floor(monAmt * usd * 1e6);
       if (micro <= 0) return res.status(400).json({ error: 'credit too small' });
-      await creditBalance(wallet, micro);
+      // Atomically claim the txHash only now that it's known-good; release it if
+      // the credit write fails so the deposit can be retried.
+      if (await seenTx(txHash)) return res.status(409).json({ error: 'tx already credited' });
+      try {
+        await creditBalance(wallet, micro);
+      } catch (e) {
+        await unseenTx(txHash).catch(() => {});
+        throw e;
+      }
       return res.status(200).json({ creditedUsd: micro / 1e6, balanceUsd: (await getBalance(wallet)) / 1e6, monAmt, monUsd: usd });
     }
 

@@ -41,7 +41,8 @@ export async function verifyErc20Transfer(txHash, token, to, minAmount) {
   let hit = null;
   for (const log of rc.logs || []) {
     if (addr(log.address) !== t) continue;
-    if ((log.topics?.[0] || '').toLowerCase() !== TRANSFER_SIG) continue;
+    if ((log.topics?.length || 0) < 3) continue; // standard ERC20 Transfer = [sig, from, to]
+    if ((log.topics[0] || '').toLowerCase() !== TRANSFER_SIG) continue;
     if (('0x' + log.topics[2].slice(26)).toLowerCase() !== dst) continue;
     const amt = big(log.data);
     if (amt >= BigInt(minAmount)) { hit = { from: ('0x' + log.topics[1].slice(26)).toLowerCase(), amount: amt }; break; }
