@@ -316,5 +316,68 @@ window.sendDoom=async function(){const i=document.getElementById('dIn'),v=i.valu
 };
 window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet, then send MON to the treasury — your balance loads automatically once the deposit confirms on-chain. when credits hit $0 i stop until you top up (no overspend). 💳');bStream.scrollTop=bStream.scrollHeight;};
 </script>
+<script>
+(function(){
+  var TREASURY='0xe7a31fd91a6f2ab0c73db3b7d0954a6a3acc7ab5';
+  var MOJAK='0x84Ea11d047A8bB23149a2d79C3B14Ab5B5907777';
+  var CHAIN='0x8f'; // 143
+  var WALLET=null;
+  function $(id){return document.getElementById(id);}
+  function short(a){return a.slice(0,6)+'\u2026'+a.slice(-4);}
+  function toWeiHex(mon){var micro=BigInt(Math.round(mon*1e6));return '0x'+(micro*(10n**12n)).toString(16);}
+  async function ensureMonad(){
+    try{await ethereum.request({method:'wallet_switchEthereumChain',params:[{chainId:CHAIN}]});}
+    catch(e){ if(e.code===4902){ await ethereum.request({method:'wallet_addEthereumChain',params:[{chainId:CHAIN,chainName:'Monad',nativeCurrency:{name:'MON',symbol:'MON',decimals:18},rpcUrls:['https://rpc.monad.xyz'],blockExplorerUrls:['https://monadscan.com']}]}); } else throw e; }
+  }
+  async function readMojak(){
+    try{ var data='0x70a08231'+WALLET.slice(2).toLowerCase().padStart(64,'0');
+      var r=await ethereum.request({method:'eth_call',params:[{to:MOJAK,data:data},'latest']});
+      var bal=BigInt(r||'0x0')/(10n**18n); var b=$('bal'); if(b)b.textContent=Number(bal).toLocaleString();
+      var p=$('balPill'); if(p)p.style.display='flex';
+    }catch(e){}
+  }
+  async function refreshCredits(){ if(!WALLET)return;
+    try{ var j=await (await fetch('/api/meter?op=balance&wallet='+WALLET)).json(); var c=$('credBal'); if(c)c.textContent='$'+(j.balanceUsd||0).toFixed(2); }catch(e){}
+  }
+  window.connectWallet=async function(){ var b=$('connectBtn');
+    if(!window.ethereum){ b.textContent='install a wallet'; setTimeout(function(){b.textContent='connect';},1800); return; }
+    try{ var accs=await ethereum.request({method:'eth_requestAccounts'}); WALLET=accs[0]; await ensureMonad();
+      b.textContent=short(WALLET)+' \u2713'; b.dataset.on='1'; b.classList.add('btn-p'); b.classList.remove('btn-g'); readMojak(); refreshCredits();
+    }catch(e){}
+  };
+  var cb=$('connectBtn'); if(cb){ var n=cb.cloneNode(true); cb.parentNode.replaceChild(n,cb); n.addEventListener('click',window.connectWallet); }
+  window.topUp=async function(){
+    if(!WALLET){ add(bStream,'bot','connect your wallet first (top-right), then top up.'); bStream.scrollTop=bStream.scrollHeight; return; }
+    var amt=prompt('How much MON to deposit for credits?','5'); if(!amt)return; var mon=parseFloat(amt); if(!(mon>0))return;
+    add(bStream,'bot','\ud83d\udce4 sending '+mon+' MON to treasury \u2014 confirm in your wallet.'); bStream.scrollTop=bStream.scrollHeight;
+    var tx; try{ tx=await ethereum.request({method:'eth_sendTransaction',params:[{from:WALLET,to:TREASURY,value:toWeiHex(mon)}]}); }
+    catch(e){ add(bStream,'bot','deposit cancelled.'); return; }
+    add(bStream,'bot','\u23f3 confirming on-chain\u2026 (a few seconds)'); bStream.scrollTop=bStream.scrollHeight;
+    for(var i=0;i<12;i++){ await new Promise(function(r){setTimeout(r,4000);});
+      try{ var res=await fetch('/api/meter?op=credit',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:WALLET,txHash:tx})});
+        var j=await res.json();
+        if(res.ok){ add(bStream,'bot','\u2705 credited $'+(j.creditedUsd||0).toFixed(2)+' \u00b7 balance $'+(j.balanceUsd||0).toFixed(2)); refreshCredits(); return; }
+        if(res.status===409){ refreshCredits(); return; }
+      }catch(e){}
+    }
+    add(bStream,'bot','still confirming \u2014 give it a moment, your balance will update.'); refreshCredits();
+  };
+  async function bloomer(action, content){
+    if(!WALLET){ add(bStream,'bot','connect your wallet (top-right) + add credits to use Bloomer.'); bStream.scrollTop=bStream.scrollHeight; return; }
+    var t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';bStream.appendChild(t);bStream.scrollTop=bStream.scrollHeight;
+    try{ var res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'bloomer',action:action,wallet:WALLET,messages:[{role:'user',content:content}]})});
+      var j=await res.json(); t.remove();
+      if(res.status===402){ add(bStream,'bot','\ud83e\ude99 out of credits \u2014 tap \u201c+ top up\u201d to add MON. (no overspend)'); refreshCredits(); return; }
+      if(j.crisis){ var m=document.createElement('div');m.className='msg crisis';m.innerHTML=j.reply;bStream.appendChild(m); }
+      else if(j.images&&j.images.length){ var mm=document.createElement('div');mm.className='msg bot'; j.images.forEach(function(src){var im=document.createElement('img');im.src=src;im.style.cssText='max-width:100%;border-radius:12px;margin-top:6px;display:block';mm.appendChild(im);}); bStream.appendChild(mm); }
+      else { add(bStream,'bot', j.reply||'\u2026'); }
+      if(j.balanceUsd!=null){ var c=$('credBal'); if(c)c.textContent='$'+j.balanceUsd.toFixed(2); }
+      bStream.scrollTop=bStream.scrollHeight;
+    }catch(e){ t.remove(); add(bStream,'bot','hiccup \u2014 try again.'); bStream.scrollTop=bStream.scrollHeight; }
+  }
+  window.quick=function(k){ var q={code:'write me a coin flip script',plan:'make me a launch plan for my token',art:'a purple feels-guy cope meme with my ticker on it',bot:'build me a telegram buybot',hype:"hype me up i'm down bad"}[k]; add(bStream,'me',q); bloomer(k,q); };
+  window.sendBloom=function(){ var i=$('bIn'),v=i.value.trim(); if(!v)return; i.value=''; add(bStream,'me',v); bloomer('chat',v); };
+})();
+</script>
 </body>
 </html>
