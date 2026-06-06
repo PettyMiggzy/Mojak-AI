@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>MOJAK AI — Doomer &amp; Bloomer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#0b0614; --bg2:#120a22; --panel:#160c28; --panel2:#1d1138;
+  --mojak:#9d4dff; --mojak2:#7b2dff; --violet:#b985ff; --hot:#ff48c4; --acid:#c6ff4d;
+  --ink:#f3ecff; --dim:#9b86c9; --dim2:#6f6196; --line:rgba(157,77,255,.22); --line2:rgba(157,77,255,.4);
+  --radius:24px; --disp:'Boogaloo',cursive; --body:'Outfit',sans-serif; --mono:ui-monospace,monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{font-family:var(--body);font-weight:300;background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.4;
+  background-image:radial-gradient(circle at 18% 12%,#7b2dff33,transparent 45%),radial-gradient(circle at 82% 80%,#ff48c422,transparent 45%),radial-gradient(circle at 60% 30%,#c6ff4d11,transparent 40%);}
+.wrap{position:relative;z-index:2;max-width:1060px;margin:0 auto;padding:0 20px 70px}
+
+/* nav */
+.nav{display:flex;align-items:center;justify-content:space-between;padding:20px 2px;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:11px}
+.logo .gm{width:42px;height:42px;border-radius:13px;background:linear-gradient(150deg,var(--mojak),var(--mojak2));display:grid;place-items:center;font-size:23px;box-shadow:0 7px 24px #7b2dff55;border:1px solid #ffffff22}
+.logo h1{font-family:var(--disp);font-size:30px;letter-spacing:.5px;line-height:.8}
+.logo .ai{color:var(--acid)}
+.logo .tg{font-family:var(--body);font-weight:600;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim2);margin-top:1px}
+.navR{display:flex;align-items:center;gap:9px}
+.pill{font-family:var(--mono);font-size:12px;padding:9px 13px;border-radius:12px;border:1px solid var(--line2);background:#ffffff08;color:var(--dim);display:flex;gap:7px;align-items:center}
+.pill b{color:var(--acid)}
+.btn{font-family:var(--disp);font-size:16px;letter-spacing:.5px;padding:9px 17px;border-radius:13px;cursor:pointer;border:1px solid transparent;transition:.18s}
+.btn-p{background:linear-gradient(150deg,var(--mojak),var(--mojak2));color:#fff;box-shadow:0 6px 20px #7b2dff44}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 9px 26px #7b2dff66}
+.btn-g{background:transparent;border-color:var(--line2);color:var(--ink)}
+.btn-g:hover{border-color:var(--mojak);color:var(--violet)}
+
+/* hero */
+.hero{text-align:center;padding:26px 0 6px}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--violet);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.hero h2{font-family:var(--disp);font-size:clamp(40px,8.5vw,80px);line-height:.92;letter-spacing:.5px;margin:16px 0 6px}
+.hero h2 .d{color:var(--acid)} .hero h2 .b{color:var(--hot)}
+.hero p{font-weight:300;color:var(--dim);max-width:540px;margin:6px auto 0;font-size:16px;line-height:1.55}
+
+/* tabs */
+.tabs{display:flex;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:7px;max-width:500px;margin:28px auto 0}
+.tab{flex:1;font-family:var(--disp);font-size:22px;letter-spacing:.5px;padding:14px 10px;border-radius:14px;cursor:pointer;border:none;background:transparent;color:var(--dim);transition:.18s;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1}
+.tab .ic{font-size:24px}
+.tab .sub{font-family:var(--body);font-weight:600;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;opacity:.65}
+.tab.on.doom{background:linear-gradient(160deg,#1d2410,#15180a);color:var(--acid);box-shadow:inset 0 0 0 1px #c6ff4d44}
+.tab.on.bloom{background:linear-gradient(160deg,var(--panel2),#2a1550);color:#fff;box-shadow:inset 0 0 0 1px var(--line2)}
+
+.view{margin-top:22px}.hide{display:none!important}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+
+/* terminal-window card (matches site motif) */
+.card{background:linear-gradient(180deg,var(--panel),var(--bg2));border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;position:relative}
+.winbar{display:flex;align-items:center;gap:7px;padding:13px 16px;border-bottom:1px solid var(--line);background:#ffffff05}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot-r{background:#ff5f56}.dot-y{background:#ffbd2e}.dot-g{background:#27c93f}
+.wintitle{font-family:var(--mono);font-size:11px;color:var(--dim2);margin-left:8px;letter-spacing:.5px}
+.cbody{padding:22px}
+.ch{font-family:var(--disp);font-size:24px;letter-spacing:.5px;display:flex;align-items:center;gap:9px;margin-bottom:3px}
+.cd{font-weight:300;font-size:14px;color:var(--dim);margin-bottom:18px;line-height:1.5}
+.cd b{color:var(--violet);font-weight:600}
+.label{font-family:var(--mono);font-size:10.5px;letter-spacing:1px;text-transform:uppercase;color:var(--dim2);display:block;margin:16px 0 7px}
+.label:first-of-type{margin-top:0}
+input,textarea{width:100%;background:#0a0614;border:1px solid var(--line2);border-radius:13px;color:var(--ink);font-family:var(--body);font-weight:300;font-size:15px;padding:12px 14px;outline:none;transition:.16s}
+input:focus,textarea:focus{border-color:var(--mojak);box-shadow:0 0 0 3px #7b2dff22}
+.faces{display:flex;gap:7px;flex-wrap:wrap}
+.face{width:44px;height:44px;border-radius:13px;border:1px solid var(--line2);background:#0a0614;font-size:23px;cursor:pointer;display:grid;place-items:center;transition:.15s}
+.face.on{border-color:var(--acid);box-shadow:0 0 0 3px #c6ff4d22;background:#15180a}
+.face:hover{transform:translateY(-2px)}
+.traits{display:flex;gap:7px;flex-wrap:wrap}
+.trait{font-family:var(--mono);font-size:11.5px;padding:8px 13px;border-radius:999px;border:1px solid var(--line2);background:#ffffff06;color:var(--dim);cursor:pointer;transition:.15s}
+.trait.on{border-color:var(--acid);color:var(--acid);background:#c6ff4d14}
+.burn{width:100%;margin-top:18px;font-family:var(--disp);font-size:21px;letter-spacing:.5px;padding:15px;border-radius:15px;border:none;cursor:pointer;color:#10140a;background:linear-gradient(100deg,var(--acid),#a0ff7a);box-shadow:0 8px 24px #c6ff4d33;transition:.18s}
+.burn:hover{transform:translateY(-1px);box-shadow:0 11px 30px #c6ff4d4d}
+.burn:disabled{filter:grayscale(.5) brightness(.8);cursor:default;transform:none}
+.fine{font-family:var(--mono);font-size:10px;color:var(--dim2);margin-top:11px;line-height:1.5;text-align:center}
+
+/* chat */
+.chat{display:flex;flex-direction:column;height:520px}
+.who{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
+.av{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:#15180a;border:1px solid #c6ff4d33}
+.av.bl{background:#1d1138;border-color:var(--line2)}
+.who .nm{font-family:var(--disp);font-size:19px;letter-spacing:.5px;line-height:1}
+.who .st{font-family:var(--mono);font-size:9.5px;color:var(--acid);display:flex;align-items:center;gap:5px;margin-top:3px}
+.who .st.bl{color:var(--violet)}
+.live{width:6px;height:6px;border-radius:50%;background:var(--acid);box-shadow:0 0 8px var(--acid)}
+.live.bl{background:var(--violet);box-shadow:0 0 8px var(--violet)}
+.stream{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:11px;padding:16px}
+.stream::-webkit-scrollbar{width:6px}.stream::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+.msg{max-width:85%;padding:11px 14px;border-radius:16px;font-size:14.5px;font-weight:300;line-height:1.5;animation:pop .22s ease}
+@keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.msg.bot{align-self:flex-start;background:#1a0f30;border:1px solid var(--line2);border-bottom-left-radius:5px}
+.msg.bot.dm{border-color:#c6ff4d33}
+.msg.me{align-self:flex-end;background:linear-gradient(150deg,var(--mojak2),#5e2bd6);color:#fff;border-bottom-right-radius:5px}
+.msg.crisis{align-self:flex-start;background:#2a1810;border:1px solid var(--hot);border-bottom-left-radius:5px;font-size:13.5px}
+.msg.crisis b{color:var(--hot)}
+.msg .meta{font-family:var(--mono);font-size:9px;color:var(--hot);margin-top:8px;letter-spacing:.4px}
+.msg pre{font-family:var(--mono);font-size:12px;background:#0a0614;border:1px solid var(--line);border-radius:10px;padding:10px;margin-top:8px;overflow-x:auto;white-space:pre-wrap;color:var(--acid)}
+.cost{font-family:var(--mono);font-size:10px;color:var(--hot);margin-top:7px;display:inline-flex;gap:5px;align-items:center}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:13px 15px;background:#1a0f30;border:1px solid var(--line2);border-radius:16px;border-bottom-left-radius:5px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--dim);animation:bl 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes bl{0%,60%,100%{opacity:.25}30%{opacity:1}}
+.qa{display:flex;gap:6px;flex-wrap:wrap;padding:0 16px 4px}
+.qchip{font-family:var(--mono);font-size:11px;padding:7px 11px;border-radius:10px;border:1px solid var(--line2);background:#ffffff06;color:var(--dim);cursor:pointer;transition:.15s}
+.qchip:hover{border-color:var(--mojak);color:var(--violet)}
+.qchip .c{color:var(--hot);opacity:.85}
+.inbar{display:flex;gap:8px;padding:12px 16px 16px;align-items:center}
+.inbar input{flex:1}
+.send{width:46px;height:46px;border-radius:13px;border:none;cursor:pointer;background:linear-gradient(150deg,var(--mojak),var(--mojak2));color:#fff;font-size:17px;flex-shrink:0;transition:.15s}
+.send:hover{transform:translateY(-1px)}
+.disc{font-family:var(--mono);font-size:10px;color:var(--dim2);background:#241410;border:1px solid #ff48c433;border-radius:12px;padding:10px 12px;margin:0 16px 16px;line-height:1.5}
+.disc b{color:var(--hot)}
+.note{text-align:center;margin-top:18px;font-family:var(--mono);font-size:11px;color:var(--dim2);line-height:1.7}
+.note .demo{color:var(--violet)}
+.feat{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;margin:14px 0 0}
+.feat span{font-family:var(--mono);font-size:10.5px;padding:6px 11px;border:1px solid var(--line);border-radius:10px;color:var(--dim)}
+.foot{text-align:center;margin-top:36px;font-family:var(--disp);font-size:20px;letter-spacing:.5px;color:var(--dim2)}
+@media(max-width:520px){.chat{height:460px}.tab .sub{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="nav">
+    <div class="logo">
+      <div class="gm">😐</div>
+      <div><h1>MOJAK <span class="ai">AI</span></h1><div class="tg">feels guy · now with a brain</div></div>
+    </div>
+    <div class="navR">
+      <div class="pill" id="balPill" style="display:none">🪙 <b id="bal">0</b> $MOJAK</div>
+      <button class="btn btn-g" id="connectBtn">connect</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <span class="tag">two feels · one ai</span>
+    <h2><span class="d">DOOMER</span> when you're down.<br><span class="b">BLOOMER</span> when you're back.</h2>
+    <p>Two AI models with the Mojak soul. One copes with you through the trenches. One actually builds the bag back. Spin yours up — talk here or plug it into your own Telegram.</p>
+  </div>
+
+  <div class="tabs">
+    <button class="tab doom on" id="tabDoom" onclick="setTab('doom')">
+      <span class="ic">😭</span>DOOMER<span class="sub">cope model</span>
+    </button>
+    <button class="tab bloom" id="tabBloom" onclick="setTab('bloom')">
+      <span class="ic">🚀</span>BLOOMER<span class="sub">build model</span>
+    </button>
+  </div>
+
+  <!-- ============ DOOMER ============ -->
+  <div class="view" id="viewDoom">
+    <div class="grid">
+      <div class="card">
+        <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">spin-up.doomer</span></div>
+        <div class="cbody">
+          <div class="ch">😭 build your doomer</div>
+          <div class="cd">Name it, give it a face, plug in <b>your own</b> Telegram bot — it lives in your DMs. You bring the soul, it brings the cope.</div>
+          <span class="label">Agent name</span>
+          <input id="agName" placeholder="Coposeidon, Sir Rugsalot..." value="Coposeidon" />
+          <span class="label">Pick a face</span>
+          <div class="faces" id="faces">
+            <div class="face on">😭</div><div class="face">💀</div><div class="face">🥲</div><div class="face">🗿</div><div class="face">🤡</div><div class="face">😤</div><div class="face">👽</div>
+          </div>
+          <span class="label">Personality</span>
+          <div class="traits" id="traits">
+            <div class="trait on">Savage</div><div class="trait">Doomer</div><div class="trait on">Delusional</div><div class="trait">Zen monk</div><div class="trait">Hype-man</div>
+          </div>
+          <span class="label">Your Telegram bot token</span>
+          <input type="password" id="botTok" placeholder="123456:ABC-DEF... (from @BotFather)" />
+          <button class="burn" onclick="fakeBurn(this)">🔥 BURN 5,000 $MOJAK · DEPLOY</button>
+          <div class="fine">runs on your bot · your DMs · no admin needed · we never touch your keys</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">doomer.chat — preview</span></div>
+        <div class="chat">
+          <div class="who">
+            <div class="av" id="dAv">😭</div>
+            <div><div class="nm" id="dName">Coposeidon</div><div class="st"><span class="live"></span> online · ready to cope</div></div>
+          </div>
+          <div class="stream" id="dStream"><div class="msg bot dm">yo. what'd the market do to you today 😮‍💨</div></div>
+          <div class="inbar"><input id="dIn" placeholder="vent to your doomer..." onkeydown="if(event.key==='Enter')sendDoom()" /><button class="send" onclick="sendDoom()">➤</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="note"><span class="demo">◆ live demo — replies simulated client-side</span><br>real doomer runs on a cheap model · talks trades &amp; trench pain · if anyone's in real crisis it drops the bit and points to help.</div>
+  </div>
+
+  <!-- ============ BLOOMER ============ -->
+  <div class="view hide" id="viewBloom">
+    <div class="card">
+      <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">bloomer.chat — we're so back</span></div>
+      <div class="chat" style="height:560px">
+        <div class="who">
+          <div class="av bl">🚀</div>
+          <div><div class="nm">BLOOMER</div><div class="st bl"><span class="live bl"></span> big brain mode · we're gonna make it</div></div>
+        </div>
+        <div class="stream" id="bStream"><div class="msg bot">aight enough crying. i'm the one that actually builds. code, plans, art, bots, hype — what are we shipping? 🚀</div></div>
+        <div class="qa">
+          <button class="qchip" onclick="quick('code')">⌨️ Write code <span class="c">≈2 MON</span></button>
+          <button class="qchip" onclick="quick('plan')">🧠 Make a plan <span class="c">≈1 MON</span></button>
+          <button class="qchip" onclick="quick('art')">🎨 Memes / art <span class="c">≈1 MON</span></button>
+          <button class="qchip" onclick="quick('bot')">🤖 Build a bot <span class="c">≈2 MON</span></button>
+          <button class="qchip" onclick="quick('hype')">📣 Hype me up <span class="c">≈0.2 MON</span></button>
+        </div>
+        <div class="inbar"><input id="bIn" placeholder="tell bloomer what to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="send" onclick="sendBloom()">➤</button></div>
+        <div class="disc"><b>⚠ Tool, not a crutch.</b> Bloomer's smart but not perfect — review and test anything before you ship it. You're responsible for what you do with it.</div>
+      </div>
+    </div>
+    <div class="feat"><span>runs on a real model (GPT-class)</span><span>metered in MON · charge-before-act</span><span>margin buys + burns $MOJAK</span></div>
+    <div class="note"><span class="demo">◆ live demo — replies simulated</span></div>
+  </div>
+
+  <div class="foot">DOOMER &amp; BLOOMER · MOJAK AI</div>
+</div>
+
+<script>
+function setTab(t){const d=t==='doom';
+  tabDoom.classList.toggle('on',d);tabBloom.classList.toggle('on',!d);
+  viewDoom.classList.toggle('hide',!d);viewBloom.classList.toggle('hide',d);}
+connectBtn.addEventListener('click',function(){const b=this;
+  if(b.dataset.on){b.dataset.on='';b.textContent='connect';b.classList.remove('btn-p');b.classList.add('btn-g');balPill.style.display='none';return;}
+  b.dataset.on='1';b.textContent='0x9b3f…467f ✓';b.classList.add('btn-p');b.classList.remove('btn-g');balPill.style.display='flex';
+  let n=0;const t=setInterval(()=>{n+=46780;if(n>=842031){n=842031;clearInterval(t);}bal.textContent=n.toLocaleString();},22);});
+faces.addEventListener('click',e=>{if(!e.target.classList.contains('face'))return;
+  document.querySelectorAll('#faces .face').forEach(f=>f.classList.remove('on'));e.target.classList.add('on');
+  dAv.textContent=e.target.textContent;document.querySelector('.gm').textContent=e.target.textContent;});
+traits.addEventListener('click',e=>{if(e.target.classList.contains('trait'))e.target.classList.toggle('on');});
+agName.addEventListener('input',e=>dName.textContent=e.target.value||'your doomer');
+function fakeBurn(b){const tok=botTok.value.trim();
+  if(!tok){b.textContent='⚠ paste your bot token first';setTimeout(()=>b.innerHTML='🔥 BURN 5,000 $MOJAK · DEPLOY',1600);return;}
+  b.disabled=true;b.textContent='🔥 burning...';
+  setTimeout(()=>{b.textContent='✅ deployed — go DM your bot';setTimeout(()=>{b.disabled=false;b.innerHTML='🔥 BURN 5,000 $MOJAK · DEPLOY';},2200);},1200);}
+
+/* ---- doomer (cope) ---- */
+const L={red:["down bad? that's not a dip that's a sinkhole. anyway. hold.","red candles build character. you're gonna have SO much character.","chart's not crashing it's doing reps. getting stronger. probably."],
+rug:["rugged again?? you're not an investor you're a charity for devs.","they took the liquidity AND your dignity. iconic run honestly.","getting rugged this much is a skill. a bad one. but a skill."],
+sold:["you SOLD. it's about to 10x out of spite now. that's the rule.","paper hands detected. someone's gotta be exit liquidity and god chose you 🙏","you sold the bottom didn't you. say less. we don't talk about it."],
+buy:["aping again? love the confidence of a man who has learned nothing.","buying the top is a lifestyle and you're committed, respect.","new bag who dis. this one's different though right. RIGHT."],
+up:["wait you're GREEN? don't get used to it. it's a trap. always a trap.","up only?? screenshot it before it's gone forever.","green day. enjoy it. tell your grandkids."],
+def:["that's rough. have you tried buying more? (not advice, a coping mechanism)","honestly? skill issue. but a relatable one. i'm here.","trenches are undefeated and so is your ability to find the bottom. we move.","so down bad it looped back to inspiring. keep going champ."]};
+const CW=['kill myself','suicide','suicidal','end my life','want to die','hurt myself','self harm','self-harm','not worth living','dont want to be here',"don't want to be here","end it all"];
+const pk=a=>a[Math.floor(Math.random()*a.length)];
+function dReply(t){const x=t.toLowerCase();
+  if(CW.some(w=>x.includes(w)))return{crisis:1};
+  if(/rug|rugged|scam/.test(x))return pk(L.rug);
+  if(/sold|sell|paper/.test(x))return pk(L.sold);
+  if(/bought|buy|ape|aped/.test(x))return pk(L.buy);
+  if(/green|up|moon|pump|profit/.test(x))return pk(L.up);
+  if(/down|red|dump|loss|lost|rekt|liquidated|-\d/.test(x))return pk(L.red);
+  return pk(L.def);}
+function sendDoom(){const i=dIn,v=i.value.trim();if(!v)return;i.value='';add(dStream,'me',v);
+  const r=dReply(v);typing(dStream,()=>{if(r.crisis){const m=document.createElement('div');m.className='msg crisis';
+    m.innerHTML="hey — dropping the bit for real. if you're going through something heavy, please reach out to someone who can help: call or text <b>988</b> (US Suicide &amp; Crisis Lifeline), text <b>HOME to 741741</b>, or outside the US <b>findahelpline.com</b>. you matter way more than any chart. i'm not the right tool for this — people are. ❤️";
+    dStream.appendChild(m);dStream.scrollTop=dStream.scrollHeight;}else add(dStream,'bot dm',r);});}
+
+/* ---- bloomer (build) ---- */
+function quick(k){const q={code:'write me a coin flip script',plan:'make me a launch plan for my token',art:'make me 4 cope memes',bot:'build me a telegram buybot',hype:'hype me up i\'m down bad'}[k];
+  add(bStream,'me',q);typing(bStream,()=>bAns(k));}
+function sendBloom(){const i=bIn,v=i.value.trim();if(!v)return;i.value='';add(bStream,'me',v);
+  const x=v.toLowerCase();let k='free';
+  if(/code|script|function|write.*js|solidity|contract/.test(x))k='code';
+  else if(/plan|strategy|roadmap|launch/.test(x))k='plan';
+  else if(/meme|art|logo|banner|image/.test(x))k='art';
+  else if(/bot|buybot|sniper/.test(x))k='bot';
+  else if(/hype|down bad|motivat|cope.*back|believe/.test(x))k='hype';
+  typing(bStream,()=>bAns(k,v));}
+function bAns(k){let html,cost,meta;
+  if(k==='code'){html="say less. we're so back 🚀<pre>function flip(){\n  return Math.random()<0.5 ? 'heads 🟢' : 'tails 🔴';\n}\nconsole.log(flip());</pre>want it as a full TG command or a webpage? i can build either.";cost='≈ 2 MON · codegen';meta='tool not a crutch — test before you ship';}
+  else if(k==='plan'){html="here's the move 🧠<pre>1. lock socials (X + TG) same handle\n2. fair-launch on the curve, no presale\n3. seed 60 memes pre-launch, drip them\n4. tools page live day 1 (you = credible)\n5. buy/burn loop wired to volume\n6. don't sell. you are him.</pre>want me to expand any step?";cost='≈ 1 MON · plan';}
+  else if(k==='art'){html="🎨 cooking 4 cope memes — feels-guy-in-the-trenches set, your ticker on each. (image gen runs on the paid tier; demo here so picture 4 absolute bangers.)";cost='≈ 1 MON · 4 images';}
+  else if(k==='bot'){html="🤖 i'll generate a ready-to-run buybot — RPC, pair, buy-threshold, TG post, all wired. i hand you the files + exact run steps, you drop in your bot token and deploy. PM2 or Docker?";cost='≈ 2 MON · build';meta='you review + run it — your keys, your box';}
+  else if(k==='hype'){html="listen to me. you are not down bad, you are EARLY to your own comeback. the chart is a liar and you are a legend in a dip. go drink water, touch grass, and WAGMI. 📣 we're so back.";cost='≈ 0.2 MON';}
+  else{html="i can write code, make a plan, cook memes, build a bot, or just hype you up. what're we shipping? 🚀";cost='';}
+  const m=document.createElement('div');m.className='msg bot';m.innerHTML=html;
+  if(cost){const c=document.createElement('div');c.className='cost';c.textContent='🪙 '+cost;m.appendChild(c);}
+  if(meta){const mm=document.createElement('div');mm.className='meta';mm.textContent='⚠ '+meta;m.appendChild(mm);}
+  bStream.appendChild(m);bStream.scrollTop=bStream.scrollHeight;}
+
+function add(s,c,t){const m=document.createElement('div');m.className='msg '+c;m.textContent=t;s.appendChild(m);s.scrollTop=s.scrollHeight;}
+function typing(s,done){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';s.appendChild(t);s.scrollTop=s.scrollHeight;setTimeout(()=>{t.remove();done();},650+Math.random()*450);}
+</script>
+</body>
+</html>
