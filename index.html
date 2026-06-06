@@ -48,6 +48,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 .tabs{display:flex;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:7px;max-width:500px;margin:28px auto 0}
 .tab{flex:1;font-family:var(--disp);font-size:22px;letter-spacing:.5px;padding:14px 10px;border-radius:14px;cursor:pointer;border:none;background:transparent;color:var(--dim);transition:.18s;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1}
 .tab .ic{font-size:24px}
+.tab img.ic{height:38px;width:auto;object-fit:contain;margin-bottom:2px}
 .tab .sub{font-family:var(--body);font-weight:600;font-size:9.5px;letter-spacing:1px;text-transform:uppercase;opacity:.65}
 .tab.on.doom{background:linear-gradient(160deg,#1d2410,#15180a);color:var(--acid);box-shadow:inset 0 0 0 1px #c6ff4d44}
 .tab.on.bloom{background:linear-gradient(160deg,var(--panel2),#2a1550);color:#fff;box-shadow:inset 0 0 0 1px var(--line2)}
@@ -161,10 +162,10 @@ img.av{object-fit:cover;object-position:top center}
 
   <div class="tabs">
     <button class="tab doom on" id="tabDoom" onclick="setTab('doom')">
-      <span class="ic">😭</span>DOOMER<span class="sub">cope model</span>
+      <img class="ic" src="assets/doomer-head.png?v=1" alt=""/>DOOMER<span class="sub">cope model</span>
     </button>
     <button class="tab bloom" id="tabBloom" onclick="setTab('bloom')">
-      <span class="ic">🚀</span>BLOOMER<span class="sub">build model</span>
+      <img class="ic" src="assets/bloomer-head.png?v=1" alt=""/>BLOOMER<span class="sub">build model</span>
     </button>
   </div>
 
@@ -197,7 +198,7 @@ img.av{object-fit:cover;object-position:top center}
         <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">doomer.chat — preview</span></div>
         <div class="chat">
           <div class="who">
-            <img class="av" id="dAv" src="assets/doomer.png?v=3" alt="Doomer"/>
+            <div class="av" id="dAv">😭</div>
             <div><div class="nm" id="dName">Coposeidon</div><div class="st"><span class="live"></span> online · ready to cope</div></div>
           </div>
           <div class="stream" id="dStream"><div class="msg bot dm">yo. what'd the market do to you today 😮‍💨</div></div>
@@ -214,7 +215,7 @@ img.av{object-fit:cover;object-position:top center}
       <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">bloomer.chat — we're so back</span></div>
       <div class="chat" style="height:560px">
         <div class="who">
-          <img class="av bl" src="assets/bloomer.png?v=3" alt="Bloomer"/>
+          <img class="av bl" src="assets/bloomer-head.png?v=1" alt="Bloomer"/>
           <div><div class="nm">BLOOMER</div><div class="st bl"><span class="live bl"></span> big brain mode · we're gonna make it</div></div>
         </div>
         <div class="stream" id="bStream"><div class="msg bot">aight enough crying. i'm the one that actually builds. code, plans, art, bots, hype — what are we shipping? 🚀</div></div>
