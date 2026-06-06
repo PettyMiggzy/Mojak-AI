@@ -24,7 +24,7 @@ body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opa
 /* nav */
 .nav{display:flex;align-items:center;justify-content:space-between;padding:20px 2px;gap:14px;flex-wrap:wrap}
 .logo{display:flex;align-items:center;gap:11px}
-.logo .gm{width:42px;height:42px;border-radius:13px;background:linear-gradient(150deg,var(--mojak),var(--mojak2));display:grid;place-items:center;font-size:23px;box-shadow:0 7px 24px #7b2dff55;border:1px solid #ffffff22}
+.logo .gm{width:46px;height:46px;border-radius:13px;background:#1a0f30;object-fit:contain;padding:3px;box-shadow:0 7px 24px #7b2dff55;border:1px solid #ffffff22}
 .logo h1{font-family:var(--disp);font-size:30px;letter-spacing:.5px;line-height:.8}
 .logo .ai{color:var(--acid)}
 .logo .tg{font-family:var(--body);font-weight:600;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim2);margin-top:1px}
@@ -87,6 +87,7 @@ input:focus,textarea:focus{border-color:var(--mojak);box-shadow:0 0 0 3px #7b2df
 .who{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line)}
 .av{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;font-size:20px;background:#15180a;border:1px solid #c6ff4d33}
 .av.bl{background:#1d1138;border-color:var(--line2)}
+img.av{object-fit:cover;object-position:top center}
 .who .nm{font-family:var(--disp);font-size:19px;letter-spacing:.5px;line-height:1}
 .who .st{font-family:var(--mono);font-size:9.5px;color:var(--acid);display:flex;align-items:center;gap:5px;margin-top:3px}
 .who .st.bl{color:var(--violet)}
@@ -125,13 +126,14 @@ input:focus,textarea:focus{border-color:var(--mojak);box-shadow:0 0 0 3px #7b2df
 .foot{text-align:center;margin-top:36px;font-family:var(--disp);font-size:20px;letter-spacing:.5px;color:var(--dim2)}
 @media(max-width:520px){.chat{height:460px}.tab .sub{display:none}}
 </style>
+<link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
 <body>
 <div class="wrap">
 
   <div class="nav">
     <div class="logo">
-      <div class="gm">😐</div>
+      <img class="gm" src="assets/logo.png" alt="Mojak"/>
       <div><h1>MOJAK <span class="ai">AI</span></h1><div class="tg">feels guy · now with a brain</div></div>
     </div>
     <div class="navR">
@@ -201,7 +203,7 @@ input:focus,textarea:focus{border-color:var(--mojak);box-shadow:0 0 0 3px #7b2df
       <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">bloomer.chat — we're so back</span></div>
       <div class="chat" style="height:560px">
         <div class="who">
-          <div class="av bl">🚀</div>
+          <img class="av bl" src="assets/bloomer.png" alt="Bloomer"/>
           <div><div class="nm">BLOOMER</div><div class="st bl"><span class="live bl"></span> big brain mode · we're gonna make it</div></div>
         </div>
         <div class="stream" id="bStream"><div class="msg bot">aight enough crying. i'm the one that actually builds. code, plans, art, bots, hype — what are we shipping? 🚀</div></div>
@@ -233,7 +235,7 @@ connectBtn.addEventListener('click',function(){const b=this;
   let n=0;const t=setInterval(()=>{n+=46780;if(n>=842031){n=842031;clearInterval(t);}bal.textContent=n.toLocaleString();},22);});
 faces.addEventListener('click',e=>{if(!e.target.classList.contains('face'))return;
   document.querySelectorAll('#faces .face').forEach(f=>f.classList.remove('on'));e.target.classList.add('on');
-  dAv.textContent=e.target.textContent;document.querySelector('.gm').textContent=e.target.textContent;});
+  dAv.textContent=e.target.textContent;});
 traits.addEventListener('click',e=>{if(e.target.classList.contains('trait'))e.target.classList.toggle('on');});
 agName.addEventListener('input',e=>dName.textContent=e.target.value||'your doomer');
 function fakeBurn(b){const tok=botTok.value.trim();
