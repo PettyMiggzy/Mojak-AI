@@ -41,22 +41,21 @@ export default async function handler(req, res) {
       const act = ACTIONS[action] ? action : 'chat';
       const spec = ACTIONS[act];
       const micro = Math.round(spec.usd * 1e6);
-      if (!(await debitBalance(wallet, micro)))
+      // Gate on balance but DO NOT debit yet. Charge ONLY after a successful result so a
+      // slow or timed-out generation can never consume credit without delivering anything.
+      if ((await getBalance(wallet)) < micro)
         return res.status(402).json({ error: 'insufficient balance', needUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
-      try {
-        if (spec.image) {
-          const img = await genImage({ prompt: (lastUser?.content || 'a funny purple wojak cope meme'), n: spec.n || 1 });
-          if (!img.images?.length) throw new Error('no image produced'); // -> refund, never charge for nothing
-          await track({ revenueMicro: micro, costMicro: imageCostMicro(img.model, img.n), tier: 'bloomer', action: 'art' });
-          return res.status(200).json({ images: img.images, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
-        }
-        const out = await chatLLM({ tier, maxTokens: spec.max, messages: [{ role: 'system', content: BLOOMER_SYS }, ...msgs] });
-        await track({ revenueMicro: micro, costMicro: textCostMicro(out.model, out.usage), tier: 'bloomer', action: act });
-        return res.status(200).json({ reply: out.text, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
-      } catch (e) {
-        await creditBalance(wallet, micro); // refund on failure
-        throw e;
+      if (spec.image) {
+        const img = await genImage({ prompt: (lastUser?.content || 'a funny purple wojak cope meme'), n: spec.n || 1 });
+        if (!img.images?.length) return res.status(502).json({ error: 'image failed \u2014 not charged, try again' });
+        await debitBalance(wallet, micro); // charge ONLY now that the image exists
+        await track({ revenueMicro: micro, costMicro: imageCostMicro(img.model, img.n), tier: 'bloomer', action: 'art' });
+        return res.status(200).json({ images: img.images, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
       }
+      const out = await chatLLM({ tier, maxTokens: spec.max, messages: [{ role: 'system', content: BLOOMER_SYS }, ...msgs] });
+      await debitBalance(wallet, micro); // charge ONLY on success
+      await track({ revenueMicro: micro, costMicro: textCostMicro(out.model, out.usage), tier: 'bloomer', action: act });
+      return res.status(200).json({ reply: out.text, costUsd: spec.usd, balanceUsd: (await getBalance(wallet)) / 1e6 });
     }
 
     // doomer — gated: connect wallet + burn 1M MOJAK to unlock, then chat

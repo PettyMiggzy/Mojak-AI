@@ -115,20 +115,27 @@ export default async function handler(req, res) {
       const micro = Math.round(spec.usd * 1e6);
       if (!(await rateLimit('tgb:' + botId + ':' + chatId, 8, 8 / 60)).allowed) return res.status(200).json({ ok: true });
       if ((await getBalance(owner)) < micro) { await tg(token, 'sendMessage', { chat_id: chatId, text: '\u26a1 this bot\'s credits are empty — the owner can top up at ai.mojakcto.xyz to keep it running.' }); return res.status(200).json({ ok: true }); }
-      await debitBalance(owner, micro);
+      // Charge ONLY after a successful result (no pre-debit) so a slow/timed-out
+      // generation can never consume the owner's credit without delivering.
       try {
         if (imgCmd) {
           const prompt = ((imgCmd[2] || '').trim() || 'a purple feels-guy meme').slice(0, 500);
           await tg(token, 'sendChatAction', { chat_id: chatId, action: 'upload_photo' }).catch(() => {});
           const img = await genImage({ prompt, n: 1 });
-          if (img.images && img.images.length) { await track({ revenueMicro: micro, costMicro: imageCostMicro(img.model, img.n), tier: 'bloomer', action: 'tgimg' }); await tgPhoto(token, chatId, img.images[0]); }
-          else { await creditBalance(owner, micro); await tg(token, 'sendMessage', { chat_id: chatId, text: 'image failed — refunded, try again.' }); }
+          if (img.images && img.images.length) {
+            await debitBalance(owner, micro);
+            await track({ revenueMicro: micro, costMicro: imageCostMicro(img.model, img.n), tier: 'bloomer', action: 'tgimg' });
+            await tgPhoto(token, chatId, img.images[0]);
+          } else {
+            await tg(token, 'sendMessage', { chat_id: chatId, text: 'image failed — try again. (you were not charged)' });
+          }
         } else {
           const out = await chatLLM({ tier: 'bloomer', maxTokens: spec.max, messages: [{ role: 'system', content: BLOOMER_SYS }, { role: 'user', content: text.slice(0, 2000) }] });
+          await debitBalance(owner, micro);
           await track({ revenueMicro: micro, costMicro: textCostMicro(out.model, out.usage), tier: 'bloomer', action: 'tg' });
           await tg(token, 'sendMessage', { chat_id: chatId, text: out.text || '...' });
         }
-      } catch (e) { await creditBalance(owner, micro).catch(() => {}); await tg(token, 'sendMessage', { chat_id: chatId, text: 'hiccup — refunded, try again.' }).catch(() => {}); }
+      } catch (e) { await tg(token, 'sendMessage', { chat_id: chatId, text: 'hiccup — try again. (you were not charged)' }).catch(() => {}); }
       return res.status(200).json({ ok: true });
     }
 
