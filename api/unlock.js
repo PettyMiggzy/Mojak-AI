@@ -4,7 +4,7 @@ import { setUnlock, isUnlocked, seenTx, unseenTx } from './_lib/store.js';
 
 const MOJAK = process.env.MOJAK_TOKEN;
 const DEAD = process.env.DEAD_ADDR || '0x000000000000000000000000000000000000dEaD';
-const BURN = process.env.BURN_UNLOCK_AMOUNT || '5000000000000000000000'; // 5,000 * 1e18
+const BURN = process.env.BURN_UNLOCK_AMOUNT || '1000000000000000000000000'; // 5,000 * 1e18
 const isAddr = (a) => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a);
 
 export default async function handler(req, res) {
