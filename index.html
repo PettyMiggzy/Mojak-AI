@@ -137,6 +137,14 @@ img.av{object-fit:cover;object-position:top center}
 .credits button{font-family:var(--disp);font-size:15px;letter-spacing:.5px;padding:7px 14px;border-radius:11px;border:1px solid var(--line2);background:#ffffff08;color:var(--violet);cursor:pointer}
 .credits button:hover{border-color:var(--mojak);color:#fff}
 .kp{text-align:center;margin-top:8px;font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim2)}
+.howto{margin-top:11px}
+.howto summary{cursor:pointer;color:var(--violet);font-family:var(--mono);font-size:11.5px;letter-spacing:.5px;list-style:none}
+.howto summary::-webkit-details-marker{display:none}
+.howto summary::before{content:"▸ ";color:var(--violet)}
+.howto[open] summary::before{content:"▾ "}
+.howto ol{margin:9px 0 0 18px;color:var(--dim);line-height:1.8;font-size:13px}
+.howto b{color:var(--violet)}
+.howto code{font-family:var(--mono);font-size:11px;color:var(--acid);background:#0a0614;padding:1px 5px;border-radius:5px}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -190,6 +198,7 @@ img.av{object-fit:cover;object-position:top center}
           </div>
           <span class="label">Your Telegram bot token</span>
           <input type="password" id="botTok" placeholder="123456:ABC-DEF... (from @BotFather)" />
+          <details class="howto"><summary>how do I get a bot token?</summary><ol><li>in Telegram, search <b>@BotFather</b> and open it</li><li>send <b>/newbot</b></li><li>pick a name, then a username ending in <b>bot</b></li><li>it replies with a token like <code>12345:ABC…</code> — paste it above ☝️</li></ol></details>
           <button class="burn" onclick="fakeBurn(this)">🔥 BURN 5,000 $MOJAK · DEPLOY</button>
           <div class="fine">runs on your bot · your DMs · no admin needed · we never touch your keys</div>
         </div>
@@ -341,7 +350,7 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
   }
   window.connectWallet=async function(){ var b=$('connectBtn');
     if(!window.ethereum){ b.textContent='install a wallet'; setTimeout(function(){b.textContent='connect';},1800); return; }
-    try{ var accs=await ethereum.request({method:'eth_requestAccounts'}); WALLET=accs[0]; await ensureMonad();
+    try{ var accs=await ethereum.request({method:'eth_requestAccounts'}); WALLET=accs[0]; window.__wallet=WALLET; await ensureMonad();
       b.textContent=short(WALLET)+' \u2713'; b.dataset.on='1'; b.classList.add('btn-p'); b.classList.remove('btn-g'); readMojak(); refreshCredits();
     }catch(e){}
   };
@@ -378,6 +387,32 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
   window.quick=function(k){ var q={code:'write me a coin flip script',plan:'make me a launch plan for my token',art:'a purple feels-guy cope meme with my ticker on it',bot:'build me a telegram buybot',hype:"hype me up i'm down bad"}[k]; add(bStream,'me',q); bloomer(k,q); };
   window.sendBloom=function(){ var i=$('bIn'),v=i.value.trim(); if(!v)return; i.value=''; add(bStream,'me',v); bloomer('chat',v); };
 })();
+</script>
+<script>
+window.fakeBurn=async function(btn){
+  var tok=(document.getElementById('botTok').value||'').trim();
+  if(!tok){ btn.textContent='\u26a0 paste your bot token first'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY';},1600); return; }
+  if(!/^\d+:[\w-]{30,}$/.test(tok)){ btn.textContent='\u26a0 that doesn\u2019t look like a bot token'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY';},1800); return; }
+  var W=window.__wallet; if(!W){ btn.textContent='\u26a0 connect wallet first (top-right)'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY';},1800); return; }
+  var MOJAK='0x84Ea11d047A8bB23149a2d79C3B14Ab5B5907777';
+  var amt=(5000n*(10n**18n)).toString(16).padStart(64,'0');
+  var data='0xa9059cbb'+'000000000000000000000000000000000000dead'.padStart(64,'0')+amt;
+  btn.disabled=true; btn.textContent='\ud83d\udd25 burning 5,000 MOJAK\u2026';
+  var tx; try{ tx=await ethereum.request({method:'eth_sendTransaction',params:[{from:W,to:MOJAK,data:data}]}); }
+  catch(e){ btn.disabled=false; btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY'; return; }
+  btn.textContent='\u23f3 confirming burn\u2026';
+  var ok=false; for(var i=0;i<12;i++){ await new Promise(function(r){setTimeout(r,4000);});
+    try{ var res=await fetch('/api/unlock?op=claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:W,txHash:tx})}); var j=await res.json();
+      if((res.ok&&j.unlocked)||res.status===409){ok=true;break;} }catch(e){} }
+  if(!ok){ btn.textContent='burn still confirming \u2014 tap deploy again shortly'; btn.disabled=false; return; }
+  btn.textContent='\ud83e\udd16 deploying your bot\u2026';
+  var name=(document.getElementById('agName').value||'Doomer');
+  var traits=[].slice.call(document.querySelectorAll('#traits .trait.on')).map(function(t){return t.textContent;});
+  try{ var rr=await fetch('/api/tg?op=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({botToken:tok,wallet:W,tier:'doomer',persona:{name:name,traits:traits}})}); var jj=await rr.json();
+    if(rr.ok){ btn.textContent='\u2705 deployed \u2014 go DM @'+(jj.botUsername||'your bot'); }
+    else { btn.disabled=false; btn.textContent='\u26a0 '+(jj.error||'register failed'); }
+  }catch(e){ btn.disabled=false; btn.textContent='\u26a0 deploy error, retry'; }
+};
 </script>
 </body>
 </html>

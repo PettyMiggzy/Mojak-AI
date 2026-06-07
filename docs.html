@@ -27,6 +27,7 @@ th,td{text-align:left;padding:11px 8px;border-bottom:1px solid var(--line);font-
 th{font-family:var(--mono);font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--dim2)}
 td.p{font-family:var(--mono);color:var(--acid);text-align:right;white-space:nowrap}
 td.a{font-weight:600}
+code{font-family:var(--mono);font-size:12px;color:var(--acid);background:#0a0614;padding:1px 5px;border-radius:5px}
 .note{font-family:var(--mono);font-size:11px;color:var(--dim2);margin-top:12px;line-height:1.6}
 .step{display:flex;gap:11px;margin:12px 0;align-items:flex-start}
 .step .n{flex-shrink:0;width:26px;height:26px;border-radius:9px;background:#1d1138;border:1px solid var(--line2);display:grid;place-items:center;font-family:var(--disp);color:var(--violet);font-size:15px}
@@ -63,6 +64,16 @@ td.a{font-weight:600}
       <tr><td class="a">Build a bot</td><td class="p">$0.25</td></tr>
     </table>
     <p class="note">Prices are in USD and charged in $MON at the live rate at request time. You're charged <b>before</b> each action runs, and capped — when your balance hits $0, Bloomer pauses until you top up. No surprise bills, no overspend.</p>
+  </div>
+
+  <h2>Your own Doomer in Telegram</h2>
+  <div class="card">
+    <p>Burn 5,000 $MOJAK to deploy a Doomer that lives in <b>your own</b> Telegram bot — your name, your DMs, no admin needed. You’ll grab a free bot token from Telegram first (about a minute):</p>
+    <div class="step"><span class="n">1</span><p>In Telegram, search <b>@BotFather</b> and open the chat.</p></div>
+    <div class="step"><span class="n">2</span><p>Send <b>/newbot</b>. Pick a display name, then a username that ends in <b>bot</b>.</p></div>
+    <div class="step"><span class="n">3</span><p>BotFather replies with a token like <code>12345:ABC-DEF…</code>. Copy it.</p></div>
+    <div class="step"><span class="n">4</span><p>Paste it into the Doomer spin-up, connect your wallet, hit deploy. We burn the MOJAK, wire your bot, and you DM it.</p></div>
+    <p class="note">Your token is encrypted at rest and never shared — we never get admin on your bot.</p>
   </div>
 
   <h2>How credits work</h2>
