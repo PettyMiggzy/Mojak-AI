@@ -1,0 +1,4 @@
+# keep docs in the repo but NEVER serve them on the live site
+*.md
+docs/
+.env.example
