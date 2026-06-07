@@ -148,6 +148,14 @@ img.av{object-fit:cover;object-position:top center}
 .howto ol{margin:9px 0 0 18px;color:var(--dim);line-height:1.8;font-size:13px}
 .howto b{color:var(--violet)}
 .howto code{font-family:var(--mono);font-size:11px;color:var(--acid);background:#0a0614;padding:1px 5px;border-radius:5px}
+.burnm{margin:18px auto 2px;max-width:560px;background:linear-gradient(180deg,#1a0c12,#160c28);border:1px solid #ff48c433;border-radius:var(--radius);padding:18px 20px;text-align:center;position:relative;overflow:hidden}
+.burnm::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 50% 130%,#ff48c422,transparent 60%);pointer-events:none}
+.burnm .bl{font-family:var(--mono);font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--hot)}
+.burnm .bn{font-family:var(--disp);font-size:42px;line-height:1.1;margin:4px 0 2px;color:var(--ink);letter-spacing:1px}
+.burnm .bn b{color:var(--acid)}
+.burnm .bs{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.5}
+.burnm .bbar{height:5px;border-radius:99px;background:#2a1420;margin-top:11px;overflow:hidden}
+.burnm .bbar i{display:block;height:100%;background:linear-gradient(90deg,#ff48c4,#ffb24d);width:0;transition:width 1s}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -170,6 +178,13 @@ img.av{object-fit:cover;object-position:top center}
     <h2><span class="d">DOOMER</span> when you're down.<br><span class="b">BLOOMER</span> when you're back.</h2>
     <p>Two AI models with the Mojak soul. One copes with you through the trenches. One actually builds the bag back. Spin yours up — talk here or plug it into your own Telegram.</p>
     <div class="heroChars"><figure><img src="assets/doomer.png?v=3" alt="Doomer"/><figcaption>Doomer · cope</figcaption></figure><figure><img src="assets/bloomer.png?v=3" alt="Bloomer"/><figcaption>Bloomer · build</figcaption></figure></div>
+  </div>
+
+  <div class="burnm" id="burnm">
+    <div class="bl">🔥 $MOJAK burned · forever</div>
+    <div class="bn"><b id="burnNum">—</b> MOJAK</div>
+    <div class="bs" id="burnSub">reading the chain…</div>
+    <div class="bbar"><i id="burnBar"></i></div>
   </div>
 
   <div class="tabs">
@@ -425,6 +440,21 @@ window.fakeBurn=async function(btn){
     if(up) up.addEventListener('change',function(e){ var f=e.target.files&&e.target.files[0]; if(!f)return; var rd=new FileReader(); rd.onload=function(){ faces.querySelectorAll('.face').forEach(function(x){x.classList.remove('on');}); setFace(rd.result); var lab=document.querySelector('#faces .up'); if(lab){lab.style.backgroundImage='url('+rd.result+')';lab.textContent='';} }; rd.readAsDataURL(f); });
     setFace('assets/feels/doomer.png');
   }
+})();
+</script>
+<script>
+(function(){
+  var API='https://ai.mojakcto.xyz/api/burn';
+  var numEl=document.getElementById('burnNum'),subEl=document.getElementById('burnSub'),barEl=document.getElementById('burnBar');
+  if(!numEl)return;
+  function fmt(n){return n>=1?Math.floor(n).toLocaleString():'0';}
+  function animateTo(target){var t0=performance.now(),dur=900;function step(t){var k=Math.min(1,(t-t0)/dur);var v=target*(1-Math.pow(1-k,3));numEl.textContent=fmt(v);if(k<1)requestAnimationFrame(step);else numEl.textContent=fmt(target);}requestAnimationFrame(step);}
+  async function read(){try{var j=await(await fetch(API)).json();if(j.error)throw 0;
+    animateTo(j.burnedTokens);
+    subEl.innerHTML=(j.pct>=0.0001?j.pct.toFixed(4):'0.0000')+'% of '+Math.round(j.supplyTokens).toLocaleString()+' supply \u00b7 bot deploys + Bloomer buyback';
+    barEl.style.width=Math.min(100,Math.max(j.pct,j.burnedTokens>0?2:0))+'%';
+  }catch(e){subEl.textContent='reading the chain\u2026';}}
+  read();setInterval(read,30000);
 })();
 </script>
 </body>
