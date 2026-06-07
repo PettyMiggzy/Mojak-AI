@@ -160,6 +160,9 @@ img.av{object-fit:cover;object-position:top center}
 .bhint b{color:var(--violet)}
 .imgtog{width:46px;flex-shrink:0;border:1px solid var(--line2);background:#160c28;border-radius:14px;font-size:18px;cursor:pointer;color:var(--dim);transition:.15s}
 .imgtog.on{background:linear-gradient(135deg,var(--hot),var(--mojak));color:#fff;border-color:transparent}
+.think{align-self:flex-start;position:relative;width:100%;max-width:300px;height:76px;border-radius:16px;border-bottom-left-radius:5px;overflow:hidden;border:1px solid var(--line2);background:#0a0614}
+.think .thinkvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72}
+.think .thinkw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:ui-monospace,monospace;font-size:12px;letter-spacing:1px;color:#fff;text-shadow:0 0 10px rgba(0,0,0,.95),0 0 22px var(--mojak)}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -349,7 +352,7 @@ function typing(s,done){const t=document.createElement('div');t.className='typin
 </script>
 <script>
 window.sendDoom=async function(){const i=document.getElementById('dIn'),v=i.value.trim();if(!v)return;i.value='';add(dStream,'me',v);
- const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';dStream.appendChild(t);dStream.scrollTop=dStream.scrollHeight;
+ const t=window.mojakThink(dStream,'chat');
  try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'doomer',messages:[{role:'user',content:v}]})});
   if(!res.ok)throw 0;const j=await res.json();t.remove();
   if(j.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML=j.reply;dStream.appendChild(m);}else add(dStream,'bot dm',j.reply||'...');
@@ -406,7 +409,7 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
   };
   async function bloomer(action, content){
     if(!WALLET){ add(bStream,'bot','connect your wallet (top-right) + add credits to use Bloomer.'); bStream.scrollTop=bStream.scrollHeight; return; }
-    var t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';bStream.appendChild(t);bStream.scrollTop=bStream.scrollHeight;
+    var t=window.mojakThink(bStream, action==='art'?'art':'chat');
     try{ var res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'bloomer',action:action,wallet:WALLET,messages:[{role:'user',content:content}]})});
       var j=await res.json(); t.remove();
       if(res.status===402){ add(bStream,'bot','\ud83e\ude99 out of credits \u2014 tap \u201c+ top up\u201d to add MON. (no overspend)'); refreshCredits(); return; }
@@ -511,6 +514,20 @@ window.deployBloomer=async function(btn){
     if(rr.ok){ btn.textContent='✅ deployed — go DM @'+(jj.botUsername||'your bot'); }
     else{ btn.disabled=false; btn.textContent='⚠ '+(jj.error||'register failed'); }
   }catch(e){ btn.disabled=false; btn.textContent='⚠ deploy error, retry'; }
+};
+</script>
+<script>
+window.mojakThink=function(stream, mode){
+  var words = mode==='art'
+    ? ['rendering\u2026','painting pixels\u2026','cooking the meme\u2026','almost there\u2026']
+    : ['thinking\u2026','cooking\u2026','wiring it up\u2026','crunching\u2026','almost there\u2026'];
+  var t=document.createElement('div'); t.className='think';
+  t.innerHTML='<video class="thinkvid" src="assets/thinking.mp4" poster="assets/thinking.jpg" autoplay loop muted playsinline></video><span class="thinkw"></span>';
+  var w=t.querySelector('.thinkw'), i=0; w.textContent=words[0];
+  var iv=setInterval(function(){ i=(i+1)%words.length; w.textContent=words[i]; }, 1300);
+  var orig=t.remove.bind(t); t.remove=function(){ clearInterval(iv); orig(); };
+  stream.appendChild(t); stream.scrollTop=stream.scrollHeight;
+  return t;
 };
 </script>
 </body>
