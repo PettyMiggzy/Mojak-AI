@@ -31,7 +31,7 @@ export async function genImage({ prompt, n = 1 }) {
   const key = process.env.OPENAI_API_KEY;
   if (!key) throw new Error('OPENAI_API_KEY not set');
   const model = process.env.IMAGE_MODEL || 'gpt-image-1-mini';
-  const quality = process.env.IMAGE_QUALITY || 'high';
+  const quality = process.env.IMAGE_QUALITY || 'medium'; // medium = faster + cheaper, well under the function timeout; set IMAGE_QUALITY=high in env to override
   const res = await fetch('https://api.openai.com/v1/images/generations', {
     method: 'POST',
     headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
