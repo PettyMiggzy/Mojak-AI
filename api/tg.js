@@ -1,13 +1,17 @@
 import crypto from 'crypto';
 import { cors, originOk } from './_lib/cors.js';
-import { rateLimit, isUnlocked, saveBot, getBot, track, debitBalance, creditBalance, getBalance } from './_lib/store.js';
+import { rateLimit, isUnlocked, saveBot, getBot, track, debitBalance, creditBalance, getBalance, seenTx, unseenTx, setUnlock } from './_lib/store.js';
 import { textCostMicro, imageCostMicro } from './_lib/rates.js';
 import { crisisCheck } from './_lib/crisis.js';
 import { chatLLM, genImage } from './_lib/llm.js';
 import { buildDoomerSystem, BLOOMER_SYS, ACTIONS } from './_lib/prompts.js';
 import { encrypt, decrypt } from './_lib/cryptobox.js';
+import { verifyErc20Transfer } from './_lib/chain.js';
 
 const isAddr = (a) => typeof a === 'string' && /^0x[0-9a-fA-F]{40}$/.test(a);
+const MOJAK_T = process.env.MOJAK_TOKEN;
+const DEAD_A = process.env.DEAD_ADDR || '0x000000000000000000000000000000000000dEaD';
+const BURN_A = process.env.BURN_UNLOCK_AMOUNT || '1000000000000000000000000';
 const base = (req) => process.env.PUBLIC_BASE_URL || `https://${req.headers.host}`;
 const tg = (token, method, payload) =>
   fetch(`https://api.telegram.org/bot${token}/${method}`, {
@@ -39,14 +43,22 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
     if (!originOk(req)) return res.status(403).json({ error: 'forbidden origin' });
     let body = req.body; if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
-    const { botToken, wallet, tier = 'doomer', persona } = body || {};
+    const { botToken, wallet, tier = 'doomer', persona, txHash } = body || {};
     if (tier !== 'doomer' && tier !== 'bloomer') return res.status(400).json({ error: 'unknown tier' });
     if (!isAddr(wallet)) return res.status(400).json({ error: 'bad wallet' });
-    if (!(await isUnlocked(wallet))) return res.status(402).json({ error: 'burn MOJAK to unlock first' });
     if (typeof botToken !== 'string' || !/^\d+:[\w-]{30,}$/.test(botToken)) return res.status(400).json({ error: 'bad bot token' });
+    if (typeof txHash !== 'string' || !/^0x[0-9a-fA-F]{64}$/.test(txHash)) return res.status(400).json({ error: 'burn tx required' });
+    if (!MOJAK_T) return res.status(500).json({ error: 'MOJAK_TOKEN not set' });
+
+    // Every deploy burns: verify a real, fresh 1M MOJAK burn on-chain BEFORE anything else.
+    let burn;
+    try { burn = await verifyErc20Transfer(txHash, MOJAK_T, DEAD_A, BURN_A); }
+    catch (e) { return res.status(425).json({ error: 'burn not confirmed yet' }); }
+    if (burn.from !== wallet.toLowerCase()) return res.status(400).json({ error: 'burn sender != wallet' });
+    if (await seenTx(txHash)) return res.status(409).json({ error: 'burn already used' });
 
     const me = await tg(botToken, 'getMe', {});
-    if (!me.ok) return res.status(400).json({ error: 'token rejected by telegram' });
+    if (!me.ok) { await unseenTx(txHash).catch(() => {}); return res.status(400).json({ error: 'token rejected by telegram' }); }
 
     // Bound the owner-supplied persona before storing / injecting into the prompt.
     const cleanPersona = {
@@ -58,8 +70,9 @@ export default async function handler(req, res) {
     const secret = crypto.randomBytes(24).toString('hex');
     await saveBot(botId, { tokenEnc: encrypt(botToken), tier, secret, owner: wallet.toLowerCase(), persona: JSON.stringify(cleanPersona) });
     const wh = await tg(botToken, 'setWebhook', { url: `${base(req)}/api/tg?botId=${botId}`, secret_token: secret, drop_pending_updates: true });
-    if (!wh.ok) return res.status(502).json({ error: 'setWebhook failed', detail: wh.description });
+    if (!wh.ok) { await unseenTx(txHash).catch(() => {}); return res.status(502).json({ error: 'setWebhook failed', detail: wh.description }); }
     if (tier === 'bloomer') await tg(botToken, 'setMyCommands', { commands: [{ command: 'meme', description: 'make a meme — /meme your idea' }, { command: 'image', description: 'generate an image — /image your prompt' }] }).catch(() => {});
+    await setUnlock(wallet).catch(() => {});
     return res.status(200).json({ ok: true, botId, botUsername: me.result?.username });
   }
 

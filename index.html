@@ -164,6 +164,7 @@ img.av{object-fit:cover;object-position:top center}
 .think .dots{display:inline-flex;gap:4px}
 .think .dots i{width:5px;height:5px;border-radius:50%;background:var(--mojak);animation:bl 1.2s infinite}
 .think .dots i:nth-child(2){animation-delay:.2s}.think .dots i:nth-child(3){animation-delay:.4s}
+.unlockbtn{margin-top:10px;width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--hot),var(--mojak));color:#fff;font-weight:700;font-family:var(--body);cursor:pointer;font-size:13px}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -352,13 +353,19 @@ function add(s,c,t){const m=document.createElement('div');m.className='msg '+c;m
 function typing(s,done){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';s.appendChild(t);s.scrollTop=s.scrollHeight;setTimeout(()=>{t.remove();done();},650+Math.random()*450);}
 </script>
 <script>
-window.sendDoom=async function(){const i=document.getElementById('dIn'),v=i.value.trim();if(!v)return;i.value='';add(dStream,'me',v);
- const t=window.mojakThink(dStream,'chat');
- try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'doomer',messages:[{role:'user',content:v}]})});
-  if(!res.ok)throw 0;const j=await res.json();t.remove();
-  if(j.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML=j.reply;dStream.appendChild(m);}else add(dStream,'bot dm',j.reply||'...');
-  dStream.scrollTop=dStream.scrollHeight;
- }catch(e){t.remove();const r=dReply(v);if(r&&r.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML="hey — for real, if you're going through something heavy please reach out: call or text <b>988</b>, text <b>HOME to 741741</b>, or <b>findahelpline.com</b>. you matter way more than any chart. ❤️";dStream.appendChild(m);}else add(dStream,'bot dm',r);dStream.scrollTop=dStream.scrollHeight;}
+window.sendDoom=async function(){
+  const i=document.getElementById('dIn'),v=i.value.trim();if(!v)return;
+  if(!window.__wallet){ add(dStream,'bot dm','connect your wallet (top-right) + burn 1,000,000 $MOJAK to unlock me.'); dStream.scrollTop=dStream.scrollHeight; return; }
+  if(!window.__doomerUnlocked){ showDoomerUnlock(); return; }
+  i.value='';add(dStream,'me',v);
+  const t=window.mojakThink(dStream,'chat');
+  try{const res=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({tier:'doomer',wallet:window.__wallet,messages:[{role:'user',content:v}]})});
+    const j=await res.json();t.remove();
+    if(res.status===402){ window.__doomerUnlocked=false; showDoomerUnlock(); return; }
+    if(!res.ok)throw 0;
+    if(j.crisis){const m=document.createElement('div');m.className='msg crisis';m.innerHTML=j.reply;dStream.appendChild(m);}else add(dStream,'bot dm',j.reply||'...');
+    dStream.scrollTop=dStream.scrollHeight;
+  }catch(e){t.remove();add(dStream,'bot dm','hiccup — try again.');dStream.scrollTop=dStream.scrollHeight;}
 };
 window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet, then send MON to the treasury — your balance loads automatically once the deposit confirms on-chain. when credits hit $0 i stop until you top up (no overspend). 💳');bStream.scrollTop=bStream.scrollHeight;};
 </script>
@@ -388,7 +395,7 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
   window.connectWallet=async function(){ var b=$('connectBtn');
     if(!window.ethereum){ b.textContent='install a wallet'; setTimeout(function(){b.textContent='connect';},1800); return; }
     try{ var accs=await ethereum.request({method:'eth_requestAccounts'}); WALLET=accs[0]; window.__wallet=WALLET; await ensureMonad();
-      b.textContent=short(WALLET)+' \u2713'; b.dataset.on='1'; b.classList.add('btn-p'); b.classList.remove('btn-g'); readMojak(); refreshCredits();
+      b.textContent=short(WALLET)+' \u2713'; b.dataset.on='1'; b.classList.add('btn-p'); b.classList.remove('btn-g'); readMojak(); refreshCredits(); fetch('/api/unlock?op=status&wallet='+WALLET).then(function(r){return r.json();}).then(function(s){window.__doomerUnlocked=!!s.unlocked;}).catch(function(){});
     }catch(e){}
   };
   var cb=$('connectBtn'); if(cb){ var n=cb.cloneNode(true); cb.parentNode.replaceChild(n,cb); n.addEventListener('click',window.connectWallet); }
@@ -434,29 +441,55 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
 })();
 </script>
 <script>
-window.fakeBurn=async function(btn){
-  var tok=(document.getElementById('botTok').value||'').trim();
-  if(!tok){ btn.textContent='\u26a0 paste your bot token first'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY';},1600); return; }
-  if(!/^\d+:[\w-]{30,}$/.test(tok)){ btn.textContent='\u26a0 that doesn\u2019t look like a bot token'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY';},1800); return; }
-  var W=window.__wallet; if(!W){ btn.textContent='\u26a0 connect wallet first (top-right)'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY';},1800); return; }
+window.__deployBot=async function(btn, tok, tier, persona, L){
+  var W=window.__wallet;
+  btn.disabled=true; btn.textContent='🔥 burning 1,000,000 MOJAK…';
   var MOJAK='0x84Ea11d047A8bB23149a2d79C3B14Ab5B5907777';
   var amt=(1000000n*(10n**18n)).toString(16).padStart(64,'0');
   var data='0xa9059cbb'+'000000000000000000000000000000000000dead'.padStart(64,'0')+amt;
-  btn.disabled=true; btn.textContent='\ud83d\udd25 burning 1,000,000 MOJAK\u2026';
-  var tx; try{ tx=await ethereum.request({method:'eth_sendTransaction',params:[{from:W,to:MOJAK,data:data}]}); }
-  catch(e){ btn.disabled=false; btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY'; return; }
-  btn.textContent='\u23f3 confirming burn\u2026';
-  var ok=false; for(var i=0;i<12;i++){ await new Promise(function(r){setTimeout(r,4000);});
-    try{ var res=await fetch('/api/unlock?op=claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:W,txHash:tx})}); var j=await res.json();
-      if((res.ok&&j.unlocked)||res.status===409){ok=true;break;} }catch(e){} }
-  if(!ok){ btn.textContent='burn still confirming \u2014 tap deploy again shortly'; btn.disabled=false; return; }
-  btn.textContent='\ud83e\udd16 deploying your bot\u2026';
+  var tx; try{ tx=await window.ethereum.request({method:'eth_sendTransaction',params:[{from:W,to:MOJAK,data:data}]}); }
+  catch(e){ btn.disabled=false; btn.innerHTML=L; return; }
+  btn.textContent='⏳ confirming burn…';
+  for(var i=0;i<14;i++){ await new Promise(function(r){setTimeout(r,4000);});
+    try{ var res=await fetch('/api/tg?op=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({botToken:tok,wallet:W,tier:tier,persona:persona,txHash:tx})}); var j=await res.json();
+      if(res.ok){ btn.textContent='✅ deployed — go DM @'+(j.botUsername||'your bot'); window.__doomerUnlocked=true; return; }
+      if(res.status===425){ continue; }
+      if(res.status===409){ btn.textContent='✅ already deployed'; window.__doomerUnlocked=true; return; }
+      btn.disabled=false; btn.textContent='⚠ '+(j.error||'deploy failed'); return;
+    }catch(e){} }
+  btn.textContent='burn still confirming — tap deploy again'; btn.disabled=false;
+};
+window.fakeBurn=function(btn){
+  var tok=(document.getElementById('botTok').value||'').trim();
+  var L='🔥 BURN 1M $MOJAK · DEPLOY';
+  function flash(m){ btn.textContent=m; setTimeout(function(){btn.innerHTML=L;},1700); }
+  if(!tok){ flash('⚠ paste your bot token first'); return; }
+  if(!/^\d+:[\w-]{30,}$/.test(tok)){ flash('⚠ that doesn’t look like a bot token'); return; }
+  if(!window.__wallet){ flash('⚠ connect wallet first (top-right)'); return; }
   var name=(document.getElementById('agName').value||'Doomer');
   var traits=[].slice.call(document.querySelectorAll('#traits .trait.on')).map(function(t){return t.textContent;});
-  try{ var rr=await fetch('/api/tg?op=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({botToken:tok,wallet:W,tier:'doomer',persona:{name:name,traits:traits}})}); var jj=await rr.json();
-    if(rr.ok){ btn.textContent='\u2705 deployed \u2014 go DM @'+(jj.botUsername||'your bot'); }
-    else { btn.disabled=false; btn.textContent='\u26a0 '+(jj.error||'register failed'); }
-  }catch(e){ btn.disabled=false; btn.textContent='\u26a0 deploy error, retry'; }
+  window.__deployBot(btn, tok, 'doomer', {name:name,traits:traits}, L);
+};
+window.showDoomerUnlock=function(){
+  if(document.getElementById('doomLock'))return;
+  var d=document.createElement('div'); d.className='msg bot dm'; d.id='doomLock';
+  d.innerHTML='🔒 burn 1,000,000 $MOJAK once to unlock me — then cope all you want.<br><button class="unlockbtn" onclick="unlockDoomer(this)">🔥 BURN 1M · UNLOCK DOOMER</button>';
+  dStream.appendChild(d); dStream.scrollTop=dStream.scrollHeight;
+};
+window.unlockDoomer=async function(btn){
+  var W=window.__wallet; if(!W){ btn.textContent='connect wallet first (top-right)'; return; }
+  btn.disabled=true; btn.textContent='🔥 burning 1,000,000 MOJAK…';
+  var MOJAK='0x84Ea11d047A8bB23149a2d79C3B14Ab5B5907777';
+  var amt=(1000000n*(10n**18n)).toString(16).padStart(64,'0');
+  var data='0xa9059cbb'+'000000000000000000000000000000000000dead'.padStart(64,'0')+amt;
+  var tx; try{ tx=await window.ethereum.request({method:'eth_sendTransaction',params:[{from:W,to:MOJAK,data:data}]}); }
+  catch(e){ btn.disabled=false; btn.innerHTML='🔥 BURN 1M · UNLOCK DOOMER'; return; }
+  btn.textContent='⏳ confirming…';
+  var ok=false; for(var i=0;i<14;i++){ await new Promise(function(r){setTimeout(r,4000);});
+    try{ var res=await fetch('/api/unlock?op=claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:W,txHash:tx})}); var j=await res.json();
+      if((res.ok&&j.unlocked)||res.status===409){ ok=true; break; } }catch(e){} }
+  if(!ok){ btn.disabled=false; btn.textContent='still confirming — tap again shortly'; return; }
+  window.__doomerUnlocked=true; var l=document.getElementById('doomLock'); if(l)l.remove(); add(dStream,'bot dm','🔓 unlocked. now — who rugged you this time?'); dStream.scrollTop=dStream.scrollHeight;
 };
 </script>
 <script>
@@ -487,29 +520,14 @@ window.fakeBurn=async function(btn){
 })();
 </script>
 <script>
-window.deployBloomer=async function(btn){
+window.deployBloomer=function(btn){
   var tok=(document.getElementById('bBotTok').value||'').trim();
   var L='🔥 BURN 1M $MOJAK · DEPLOY BLOOMER';
   function flash(m){ btn.textContent=m; setTimeout(function(){btn.innerHTML=L;},1700); }
   if(!tok){ flash('⚠ paste your bot token first'); return; }
   if(!/^\d+:[\w-]{30,}$/.test(tok)){ flash('⚠ that doesn’t look like a bot token'); return; }
-  var W=window.__wallet; if(!W){ flash('⚠ connect wallet first (top-right)'); return; }
-  btn.disabled=true; btn.textContent='🔥 burning 1,000,000 MOJAK…';
-  var MOJAK='0x84Ea11d047A8bB23149a2d79C3B14Ab5B5907777';
-  var amt=(1000000n*(10n**18n)).toString(16).padStart(64,'0');
-  var data='0xa9059cbb'+'000000000000000000000000000000000000dead'.padStart(64,'0')+amt;
-  var tx; try{ tx=await window.ethereum.request({method:'eth_sendTransaction',params:[{from:W,to:MOJAK,data:data}]}); }
-  catch(e){ btn.disabled=false; btn.innerHTML=L; return; }
-  btn.textContent='⏳ confirming burn…';
-  var ok=false; for(var i=0;i<12;i++){ await new Promise(function(r){setTimeout(r,4000);});
-    try{ var res=await fetch('/api/unlock?op=claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:W,txHash:tx})}); var j=await res.json();
-      if((res.ok&&j.unlocked)||res.status===409){ ok=true; break; } }catch(e){} }
-  if(!ok){ btn.textContent='burn still confirming — tap deploy again shortly'; btn.disabled=false; return; }
-  btn.textContent='🤖 deploying bloomer…';
-  try{ var rr=await fetch('/api/tg?op=register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({botToken:tok,wallet:W,tier:'bloomer',persona:{name:'Bloomer'}})}); var jj=await rr.json();
-    if(rr.ok){ btn.textContent='✅ deployed — go DM @'+(jj.botUsername||'your bot'); }
-    else{ btn.disabled=false; btn.textContent='⚠ '+(jj.error||'register failed'); }
-  }catch(e){ btn.disabled=false; btn.textContent='⚠ deploy error, retry'; }
+  if(!window.__wallet){ flash('⚠ connect wallet first (top-right)'); return; }
+  window.__deployBot(btn, tok, 'bloomer', {name:'Bloomer'}, L);
 };
 </script>
 <script>

@@ -1,5 +1,5 @@
 import { cors, originOk, clientIp } from './_lib/cors.js';
-import { rateLimit, debitBalance, creditBalance, getBalance, track } from './_lib/store.js';
+import { rateLimit, debitBalance, creditBalance, getBalance, track, isUnlocked } from './_lib/store.js';
 import { textCostMicro, imageCostMicro } from './_lib/rates.js';
 import { crisisCheck } from './_lib/crisis.js';
 import { chatLLM, genImage } from './_lib/llm.js';
@@ -59,8 +59,10 @@ export default async function handler(req, res) {
       }
     }
 
-    // default: doomer — free, rate limited per wallet|ip
-    const id = isAddr(wallet) ? wallet : clientIp(req);
+    // doomer — gated: connect wallet + burn 1M MOJAK to unlock, then chat
+    if (!isAddr(wallet)) return res.status(400).json({ error: 'connect wallet to use doomer' });
+    if (!(await isUnlocked(wallet))) return res.status(402).json({ error: 'burn to unlock doomer' });
+    const id = wallet;
     const rl = await rateLimit('d:' + id, 20, 20 / 60);
     if (!rl.allowed) return res.status(429).json({ error: 'slow down a sec', remaining: rl.remaining });
     const out = await chatLLM({ tier: 'doomer', maxTokens: 350, messages: [{ role: 'system', content: DOOMER_SYS }, ...msgs] });
