@@ -156,6 +156,8 @@ img.av{object-fit:cover;object-position:top center}
 .burnm .bs{font-family:var(--mono);font-size:11px;color:var(--dim);line-height:1.5}
 .burnm .bbar{height:5px;border-radius:99px;background:#2a1420;margin-top:11px;overflow:hidden}
 .burnm .bbar i{display:block;height:100%;background:linear-gradient(90deg,#ff48c4,#ffb24d);width:0;transition:width 1s}
+.bhint{font-family:var(--mono);font-size:10.5px;color:var(--dim2);margin:2px 0 8px 2px}
+.bhint b{color:var(--violet)}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -251,11 +253,12 @@ img.av{object-fit:cover;object-position:top center}
         <div class="qa">
           <button class="qchip" onclick="quick('code')">⌨️ Write code</button>
           <button class="qchip" onclick="quick('plan')">🧠 Make a plan</button>
-          <button class="qchip" onclick="quick('art')">🎨 Meme image</button>
-          <button class="qchip" onclick="quick('bot')">🤖 Build a bot</button>
+          <button class="qchip" onclick="quick('art')">🎨 Make image</button>
+          <button class="qchip" onclick="quick('bot')">🤖 Bot code</button>
           <button class="qchip" onclick="quick('hype')">📣 Hype me up</button>
         </div>
-        <div class="inbar"><input id="bIn" placeholder="tell bloomer what to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="send" onclick="sendBloom()">➤</button></div>
+        <div class="bhint">🎨 want a picture? describe it, then tap <b>Make image</b></div>
+        <div class="inbar"><input id="bIn" placeholder="describe a picture, or ask me to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="send" onclick="sendBloom()">➤</button></div>
         <div class="disc"><b>⚠ Tool, not a crutch.</b> Bloomer's smart but not perfect — review and test anything before you ship it. You're responsible for what you do with it.</div>
       </div>
     </div>
@@ -400,8 +403,15 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
       bStream.scrollTop=bStream.scrollHeight;
     }catch(e){ t.remove(); add(bStream,'bot','hiccup \u2014 try again.'); bStream.scrollTop=bStream.scrollHeight; }
   }
-  window.quick=function(k){ var q={code:'write me a coin flip script',plan:'make me a launch plan for my token',art:'a purple feels-guy cope meme with my ticker on it',bot:'build me a telegram buybot',hype:"hype me up i'm down bad"}[k]; add(bStream,'me',q); bloomer(k,q); };
-  window.sendBloom=function(){ var i=$('bIn'),v=i.value.trim(); if(!v)return; i.value=''; add(bStream,'me',v); bloomer('chat',v); };
+  window.quick=function(k){
+    if(k==='art'){ var inp=$('bIn'); var p=(inp&&inp.value.trim())||''; if(inp)inp.value=''; var q=p||'a purple feels-guy cope meme with my ticker on it'; add(bStream,'me','\uD83C\uDFA8 '+q); bloomer('art',q); return; }
+    var q={code:'write me a coin flip script',plan:'make me a launch plan for my token',bot:'write me a telegram buybot script',hype:"hype me up i'm down bad"}[k]; add(bStream,'me',q); bloomer(k,q);
+    if(k==='bot') add(bStream,'bot','\uD83D\uDC49 that\u2019s the bot code you run yourself. to deploy your OWN live Doomer bot to Telegram (where your bot token goes), switch to the Doomer tab \u2192 \u201Cspin up your own.\u201D');
+  };
+  var IMG_RE=/\b(image|picture|pic|photo|meme|draw|drawing|logo|render|artwork|pfp|avatar|sticker|banner|wallpaper|illustration|portrait)\b|generate.*(image|pic|art)|make .*(image|pic|logo|meme|art)/i;
+  window.sendBloom=function(){ var i=$('bIn'),v=i.value.trim(); if(!v)return; i.value='';
+    if(IMG_RE.test(v)){ add(bStream,'me','\uD83C\uDFA8 '+v); bloomer('art',v); return; }
+    add(bStream,'me',v); bloomer('chat',v); };
 })();
 </script>
 <script>
