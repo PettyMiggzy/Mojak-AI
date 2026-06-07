@@ -74,6 +74,9 @@ input:focus,textarea:focus{border-color:var(--mojak);box-shadow:0 0 0 3px #7b2df
 .faces{display:flex;gap:7px;flex-wrap:wrap}
 .face{width:44px;height:44px;border-radius:13px;border:1px solid var(--line2);background:#0a0614;font-size:23px;cursor:pointer;display:grid;place-items:center;transition:.15s}
 .face.on{border-color:var(--acid);box-shadow:0 0 0 3px #c6ff4d22;background:#15180a}
+.face img{width:100%;height:100%;object-fit:cover;border-radius:inherit}
+.up{width:44px;height:44px;border-radius:13px;border:1px dashed var(--line2);background:#0a0614 center/cover no-repeat;font-size:19px;cursor:pointer;display:grid;place-items:center;color:var(--dim)}
+.up:hover{border-color:var(--acid);color:var(--acid)}
 .face:hover{transform:translateY(-2px)}
 .traits{display:flex;gap:7px;flex-wrap:wrap}
 .trait{font-family:var(--mono);font-size:11.5px;padding:8px 13px;border-radius:999px;border:1px solid var(--line2);background:#ffffff06;color:var(--dim);cursor:pointer;transition:.15s}
@@ -188,9 +191,9 @@ img.av{object-fit:cover;object-position:top center}
           <div class="cd">Name it, give it a face, plug in <b>your own</b> Telegram bot — it lives in your DMs. You bring the soul, it brings the cope.</div>
           <span class="label">Agent name</span>
           <input id="agName" placeholder="Coposeidon, Sir Rugsalot..." value="Coposeidon" />
-          <span class="label">Pick a face</span>
+          <span class="label">Pick a face — or upload your own</span>
           <div class="faces" id="faces">
-            <div class="face on">😭</div><div class="face">💀</div><div class="face">🥲</div><div class="face">🗿</div><div class="face">🤡</div><div class="face">😤</div><div class="face">👽</div>
+            <div class="face on" data-src="assets/feels/doomer.png"><img src="assets/feels/doomer.png" alt="doomer"></div><div class="face" data-src="assets/feels/bloomer.png"><img src="assets/feels/bloomer.png" alt="bloomer"></div><div class="face" data-src="assets/feels/based.png"><img src="assets/feels/based.png" alt="based"></div><div class="face" data-src="assets/feels/comfy.png"><img src="assets/feels/comfy.png" alt="comfy"></div><div class="face" data-src="assets/feels/sending.png"><img src="assets/feels/sending.png" alt="sending"></div><div class="face" data-src="assets/feels/rage.png"><img src="assets/feels/rage.png" alt="rage"></div><div class="face" data-src="assets/feels/npc.png"><img src="assets/feels/npc.png" alt="npc"></div><label class="up" title="upload your own pfp">📷<input type="file" accept="image/*" hidden id="pfpUp"></label>
           </div>
           <span class="label">Personality</span>
           <div class="traits" id="traits">
@@ -199,7 +202,7 @@ img.av{object-fit:cover;object-position:top center}
           <span class="label">Your Telegram bot token</span>
           <input type="password" id="botTok" placeholder="123456:ABC-DEF... (from @BotFather)" />
           <details class="howto"><summary>how do I get a bot token?</summary><ol><li>in Telegram, search <b>@BotFather</b> and open it</li><li>send <b>/newbot</b></li><li>pick a name, then a username ending in <b>bot</b></li><li>it replies with a token like <code>12345:ABC…</code> — paste it above ☝️</li></ol></details>
-          <button class="burn" onclick="fakeBurn(this)">🔥 BURN 5,000 $MOJAK · DEPLOY</button>
+          <button class="burn" onclick="fakeBurn(this)">🔥 BURN 1M $MOJAK · DEPLOY</button>
           <div class="fine">runs on your bot · your DMs · no admin needed · we never touch your keys</div>
         </div>
       </div>
@@ -208,7 +211,7 @@ img.av{object-fit:cover;object-position:top center}
         <div class="winbar"><span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span><span class="wintitle">doomer.chat — preview</span></div>
         <div class="chat">
           <div class="who">
-            <div class="av" id="dAv">😭</div>
+            <div class="av" id="dAv"></div>
             <div><div class="nm" id="dName">Coposeidon</div><div class="st"><span class="live"></span> online · ready to cope</div></div>
           </div>
           <div class="stream" id="dStream"><div class="msg bot dm">yo. what'd the market do to you today 😮‍💨</div></div>
@@ -216,7 +219,7 @@ img.av{object-fit:cover;object-position:top center}
         </div>
       </div>
     </div>
-    <div class="note"><span class="demo">◆ live demo — replies simulated client-side</span><br>real doomer runs lean · talks trades &amp; trench pain · if anyone's in real crisis it drops the bit and points to help.</div>
+    <div class="note"><span class="demo">◆ live</span> · free to chat · talks trades &amp; trench pain · if anyone's in real crisis it drops the bit and points to help.</div>
   </div>
 
   <!-- ============ BLOOMER ============ -->
@@ -242,7 +245,7 @@ img.av{object-fit:cover;object-position:top center}
       </div>
     </div>
     <div class="feat"><span>frontier-grade build model</span><span>pay-as-you-go in $MON</span><span>fuels $MOJAK buyback &amp; burn</span></div>
-    <div class="note"><span class="demo">◆ live demo — replies simulated</span></div>
+    <div class="note"><span class="demo">◆ live</span> · connect wallet + add credits to build.</div>
   </div>
 
   <div class="foot">DOOMER &amp; BLOOMER · MOJAK AI</div>
@@ -257,15 +260,13 @@ connectBtn.addEventListener('click',function(){const b=this;
   if(b.dataset.on){b.dataset.on='';b.textContent='connect';b.classList.remove('btn-p');b.classList.add('btn-g');balPill.style.display='none';return;}
   b.dataset.on='1';b.textContent='0x9b3f…467f ✓';b.classList.add('btn-p');b.classList.remove('btn-g');balPill.style.display='flex';
   let n=0;const t=setInterval(()=>{n+=46780;if(n>=842031){n=842031;clearInterval(t);}bal.textContent=n.toLocaleString();},22);});
-faces.addEventListener('click',e=>{if(!e.target.classList.contains('face'))return;
-  document.querySelectorAll('#faces .face').forEach(f=>f.classList.remove('on'));e.target.classList.add('on');
-  dAv.textContent=e.target.textContent;});
+/* face picker handled by injected script */
 traits.addEventListener('click',e=>{if(e.target.classList.contains('trait'))e.target.classList.toggle('on');});
 agName.addEventListener('input',e=>dName.textContent=e.target.value||'your doomer');
 function fakeBurn(b){const tok=botTok.value.trim();
-  if(!tok){b.textContent='⚠ paste your bot token first';setTimeout(()=>b.innerHTML='🔥 BURN 5,000 $MOJAK · DEPLOY',1600);return;}
+  if(!tok){b.textContent='⚠ paste your bot token first';setTimeout(()=>b.innerHTML='🔥 BURN 1M $MOJAK · DEPLOY',1600);return;}
   b.disabled=true;b.textContent='🔥 burning...';
-  setTimeout(()=>{b.textContent='✅ deployed — go DM your bot';setTimeout(()=>{b.disabled=false;b.innerHTML='🔥 BURN 5,000 $MOJAK · DEPLOY';},2200);},1200);}
+  setTimeout(()=>{b.textContent='✅ deployed — go DM your bot';setTimeout(()=>{b.disabled=false;b.innerHTML='🔥 BURN 1M $MOJAK · DEPLOY';},2200);},1200);}
 
 /* ---- doomer (cope) ---- */
 const L={red:["down bad? that's not a dip that's a sinkhole. anyway. hold.","red candles build character. you're gonna have SO much character.","chart's not crashing it's doing reps. getting stronger. probably."],
@@ -391,15 +392,15 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
 <script>
 window.fakeBurn=async function(btn){
   var tok=(document.getElementById('botTok').value||'').trim();
-  if(!tok){ btn.textContent='\u26a0 paste your bot token first'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY';},1600); return; }
-  if(!/^\d+:[\w-]{30,}$/.test(tok)){ btn.textContent='\u26a0 that doesn\u2019t look like a bot token'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY';},1800); return; }
-  var W=window.__wallet; if(!W){ btn.textContent='\u26a0 connect wallet first (top-right)'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY';},1800); return; }
+  if(!tok){ btn.textContent='\u26a0 paste your bot token first'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY';},1600); return; }
+  if(!/^\d+:[\w-]{30,}$/.test(tok)){ btn.textContent='\u26a0 that doesn\u2019t look like a bot token'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY';},1800); return; }
+  var W=window.__wallet; if(!W){ btn.textContent='\u26a0 connect wallet first (top-right)'; setTimeout(function(){btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY';},1800); return; }
   var MOJAK='0x84Ea11d047A8bB23149a2d79C3B14Ab5B5907777';
-  var amt=(5000n*(10n**18n)).toString(16).padStart(64,'0');
+  var amt=(1000000n*(10n**18n)).toString(16).padStart(64,'0');
   var data='0xa9059cbb'+'000000000000000000000000000000000000dead'.padStart(64,'0')+amt;
-  btn.disabled=true; btn.textContent='\ud83d\udd25 burning 5,000 MOJAK\u2026';
+  btn.disabled=true; btn.textContent='\ud83d\udd25 burning 1,000,000 MOJAK\u2026';
   var tx; try{ tx=await ethereum.request({method:'eth_sendTransaction',params:[{from:W,to:MOJAK,data:data}]}); }
-  catch(e){ btn.disabled=false; btn.innerHTML='\ud83d\udd25 BURN 5,000 $MOJAK \u00b7 DEPLOY'; return; }
+  catch(e){ btn.disabled=false; btn.innerHTML='\ud83d\udd25 BURN 1M $MOJAK \u00b7 DEPLOY'; return; }
   btn.textContent='\u23f3 confirming burn\u2026';
   var ok=false; for(var i=0;i<12;i++){ await new Promise(function(r){setTimeout(r,4000);});
     try{ var res=await fetch('/api/unlock?op=claim',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({wallet:W,txHash:tx})}); var j=await res.json();
@@ -413,6 +414,18 @@ window.fakeBurn=async function(btn){
     else { btn.disabled=false; btn.textContent='\u26a0 '+(jj.error||'register failed'); }
   }catch(e){ btn.disabled=false; btn.textContent='\u26a0 deploy error, retry'; }
 };
+</script>
+<script>
+(function(){
+  var faces=document.getElementById('faces'), dAv=document.getElementById('dAv');
+  function setFace(src){ if(dAv){ dAv.textContent=''; dAv.style.backgroundImage='url('+src+')'; dAv.style.backgroundSize='cover'; dAv.style.backgroundPosition='center'; } window.__face=src; }
+  if(faces){
+    faces.addEventListener('click',function(e){ var t=e.target.closest('.face'); if(!t)return; faces.querySelectorAll('.face').forEach(function(f){f.classList.remove('on');}); t.classList.add('on'); if(t.dataset.src) setFace(t.dataset.src); });
+    var up=document.getElementById('pfpUp');
+    if(up) up.addEventListener('change',function(e){ var f=e.target.files&&e.target.files[0]; if(!f)return; var rd=new FileReader(); rd.onload=function(){ faces.querySelectorAll('.face').forEach(function(x){x.classList.remove('on');}); setFace(rd.result); var lab=document.querySelector('#faces .up'); if(lab){lab.style.backgroundImage='url('+rd.result+')';lab.textContent='';} }; rd.readAsDataURL(f); });
+    setFace('assets/feels/doomer.png');
+  }
+})();
 </script>
 </body>
 </html>
