@@ -206,9 +206,9 @@ img.av{object-fit:cover;object-position:top center}
           <div class="cd">Name it, give it a face, plug in <b>your own</b> Telegram bot — it lives in your DMs. You bring the soul, it brings the cope.</div>
           <span class="label">Agent name</span>
           <input id="agName" placeholder="Coposeidon, Sir Rugsalot..." value="Coposeidon" />
-          <span class="label">Pick a face — or upload your own</span>
+          <span class="label">Pick a face <span style="color:var(--dim2);font-weight:400;text-transform:none;letter-spacing:0">(preview)</span></span>
           <div class="faces" id="faces">
-            <div class="face on" data-src="assets/feels/doomer.png"><img src="assets/feels/doomer.png" alt="doomer"></div><div class="face" data-src="assets/feels/bloomer.png"><img src="assets/feels/bloomer.png" alt="bloomer"></div><div class="face" data-src="assets/feels/based.png"><img src="assets/feels/based.png" alt="based"></div><div class="face" data-src="assets/feels/comfy.png"><img src="assets/feels/comfy.png" alt="comfy"></div><div class="face" data-src="assets/feels/sending.png"><img src="assets/feels/sending.png" alt="sending"></div><div class="face" data-src="assets/feels/rage.png"><img src="assets/feels/rage.png" alt="rage"></div><div class="face" data-src="assets/feels/npc.png"><img src="assets/feels/npc.png" alt="npc"></div><label class="up" title="upload your own pfp">📷<input type="file" accept="image/*" hidden id="pfpUp"></label>
+            <div class="face on" data-src="assets/feels/doomer.png"><img src="assets/feels/doomer.png" alt="doomer"></div><div class="face" data-src="assets/feels/bloomer.png"><img src="assets/feels/bloomer.png" alt="bloomer"></div><div class="face" data-src="assets/feels/based.png"><img src="assets/feels/based.png" alt="based"></div><div class="face" data-src="assets/feels/comfy.png"><img src="assets/feels/comfy.png" alt="comfy"></div><div class="face" data-src="assets/feels/sending.png"><img src="assets/feels/sending.png" alt="sending"></div><div class="face" data-src="assets/feels/rage.png"><img src="assets/feels/rage.png" alt="rage"></div><div class="face" data-src="assets/feels/npc.png"><img src="assets/feels/npc.png" alt="npc"></div>
           </div>
           <span class="label">Personality</span>
           <div class="traits" id="traits">
@@ -216,7 +216,7 @@ img.av{object-fit:cover;object-position:top center}
           </div>
           <span class="label">Your Telegram bot token</span>
           <input type="password" id="botTok" placeholder="123456:ABC-DEF... (from @BotFather)" />
-          <details class="howto"><summary>how do I get a bot token?</summary><ol><li>in Telegram, search <b>@BotFather</b> and open it</li><li>send <b>/newbot</b></li><li>pick a name, then a username ending in <b>bot</b></li><li>it replies with a token like <code>12345:ABC…</code> — paste it above ☝️</li></ol></details>
+          <details class="howto"><summary>how do I get a token + give my bot a face?</summary><ol><li>in Telegram, search <b>@BotFather</b> and open it</li><li>send <b>/newbot</b></li><li>pick a name, then a username ending in <b>bot</b></li><li>it replies with a token like <code>12345:ABC…</code> — paste it above ☝️</li><li><b>your bot’s picture:</b> send <b>/setuserpic</b> to BotFather, pick your bot, upload your image — that’s the face people see in Telegram (the one above is just this preview)</li></ol></details>
           <button class="burn" onclick="fakeBurn(this)">🔥 BURN 1M $MOJAK · DEPLOY</button>
           <div class="fine">runs on your bot · your DMs · no admin needed · we never touch your keys</div>
         </div>
