@@ -158,6 +158,8 @@ img.av{object-fit:cover;object-position:top center}
 .burnm .bbar i{display:block;height:100%;background:linear-gradient(90deg,#ff48c4,#ffb24d);width:0;transition:width 1s}
 .bhint{font-family:var(--mono);font-size:10.5px;color:var(--dim2);margin:2px 0 8px 2px}
 .bhint b{color:var(--violet)}
+.imgtog{width:46px;flex-shrink:0;border:1px solid var(--line2);background:#160c28;border-radius:14px;font-size:18px;cursor:pointer;color:var(--dim);transition:.15s}
+.imgtog.on{background:linear-gradient(135deg,var(--hot),var(--mojak));color:#fff;border-color:transparent}
 </style>
 <link rel="icon" type="image/png" href="assets/favicon.png"/>
 </head>
@@ -258,7 +260,7 @@ img.av{object-fit:cover;object-position:top center}
           <button class="qchip" onclick="quick('hype')">📣 Hype me up</button>
         </div>
         <div class="bhint">🎨 want a picture? describe it, then tap <b>Make image</b></div>
-        <div class="inbar"><input id="bIn" placeholder="describe a picture, or ask me to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="send" onclick="sendBloom()">➤</button></div>
+        <div class="inbar"><input id="bIn" placeholder="describe a picture, or ask me to build..." onkeydown="if(event.key==='Enter')sendBloom()" /><button class="imgtog" id="imgTog" title="image mode" onclick="toggleImg()">🎨</button><button class="send" onclick="sendBloom()">➤</button></div>
         <div class="disc"><b>⚠ Tool, not a crutch.</b> Bloomer's smart but not perfect — review and test anything before you ship it. You're responsible for what you do with it.</div>
       </div>
     </div>
@@ -409,8 +411,9 @@ window.topUp=function(){add(bStream,'bot','to load credits: connect your wallet,
     if(k==='bot') add(bStream,'bot','\uD83D\uDC49 that\u2019s the bot code you run yourself. to deploy your OWN live Doomer bot to Telegram (where your bot token goes), switch to the Doomer tab \u2192 \u201Cspin up your own.\u201D');
   };
   var IMG_RE=/\b(image|picture|pic|photo|meme|draw|drawing|logo|render|artwork|pfp|avatar|sticker|banner|wallpaper|illustration|portrait)\b|generate.*(image|pic|art)|make .*(image|pic|logo|meme|art)/i;
+  window.toggleImg=function(){ window.__imgMode=!window.__imgMode; var b=$('imgTog'); if(b)b.classList.toggle('on',window.__imgMode); var i=$('bIn'); if(i)i.placeholder=window.__imgMode?'describe the image to generate\u2026':'describe a picture, or ask me to build...'; };
   window.sendBloom=function(){ var i=$('bIn'),v=i.value.trim(); if(!v)return; i.value='';
-    if(IMG_RE.test(v)){ add(bStream,'me','\uD83C\uDFA8 '+v); bloomer('art',v); return; }
+    if(window.__imgMode||IMG_RE.test(v)){ add(bStream,'me','\uD83C\uDFA8 '+v); bloomer('art',v); return; }
     add(bStream,'me',v); bloomer('chat',v); };
 })();
 </script>
