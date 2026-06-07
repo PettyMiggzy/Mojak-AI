@@ -1,9 +1,9 @@
 import crypto from 'crypto';
 import { cors, originOk } from './_lib/cors.js';
 import { rateLimit, isUnlocked, saveBot, getBot, track } from './_lib/store.js';
-import { textCostMicro, imageCostMicro } from './_lib/rates.js';
+import { textCostMicro } from './_lib/rates.js';
 import { crisisCheck } from './_lib/crisis.js';
-import { chatLLM, genImage } from './_lib/llm.js';
+import { chatLLM } from './_lib/llm.js';
 import { buildDoomerSystem } from './_lib/prompts.js';
 import { encrypt, decrypt } from './_lib/cryptobox.js';
 
@@ -13,15 +13,6 @@ const tg = (token, method, payload) =>
   fetch(`https://api.telegram.org/bot${token}/${method}`, {
     method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
   }).then(r => r.json());
-
-async function tgPhoto(token, chatId, dataUrl, caption) {
-  const s = String(dataUrl); const b64 = s.includes(',') ? s.split(',')[1] : s;
-  const fd = new FormData();
-  fd.append('chat_id', String(chatId));
-  if (caption) fd.append('caption', caption);
-  fd.append('photo', new Blob([Buffer.from(b64, 'base64')], { type: 'image/png' }), 'mojak.png');
-  return fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd }).then(r => r.json());
-}
 
 function safeEq(a, b) {
   const x = Buffer.from(String(a)), y = Buffer.from(String(b));
@@ -59,7 +50,6 @@ export default async function handler(req, res) {
     await saveBot(botId, { tokenEnc: encrypt(botToken), tier, secret, owner: wallet.toLowerCase(), persona: JSON.stringify(cleanPersona) });
     const wh = await tg(botToken, 'setWebhook', { url: `${base(req)}/api/tg?botId=${botId}`, secret_token: secret, drop_pending_updates: true });
     if (!wh.ok) return res.status(502).json({ error: 'setWebhook failed', detail: wh.description });
-    await tg(botToken, 'setMyCommands', { commands: [{ command: 'meme', description: 'cook a cope meme — /meme your idea' }, { command: 'image', description: 'make an image — /image your prompt' }] }).catch(() => {});
     return res.status(200).json({ ok: true, botId, botUsername: me.result?.username });
   }
 
@@ -87,22 +77,7 @@ export default async function handler(req, res) {
     if (c.crisis) { await tg(token, 'sendMessage', { chat_id: chatId, text: c.reply }); return res.status(200).json({ ok: true }); }
 
     if (text.trim() === '/start') {
-      await tg(token, 'sendMessage', { chat_id: chatId, text: 'gm. i\'m ' + (persona.name || 'your Doomer') + '. vent to me about the trenches, or send /meme <your idea> and i\'ll cook you a cope meme.' });
-      return res.status(200).json({ ok: true });
-    }
-
-    const imgCmd = text.match(/^\/(meme|image|img|draw|pic)\b\s*([\s\S]*)/i);
-    if (imgCmd) {
-      const okBot = (await rateLimit('tgimg:bot:' + botId, 40, 40 / 3600)).allowed;
-      const okChat = (await rateLimit('tgimg:chat:' + botId + ':' + chatId, 5, 5 / 300)).allowed;
-      if (!okBot || !okChat) { await tg(token, 'sendMessage', { chat_id: chatId, text: 'easy on the memes — give it a few minutes.' }); return res.status(200).json({ ok: true }); }
-      const prompt = ((imgCmd[2] || '').trim() || 'a sad purple wojak feels-guy cope meme, crypto trenches').slice(0, 500);
-      await tg(token, 'sendChatAction', { chat_id: chatId, action: 'upload_photo' }).catch(() => {});
-      const img = await genImage({ prompt, n: 1 });
-      if (img.images && img.images.length) {
-        await track({ costMicro: imageCostMicro(img.model, img.n), tier: 'doomer', action: 'tgimg' });
-        await tgPhoto(token, chatId, img.images[0]);
-      } else { await tg(token, 'sendMessage', { chat_id: chatId, text: 'couldn\'t cook that one, try again.' }); }
+      await tg(token, 'sendMessage', { chat_id: chatId, text: 'gm. i\'m ' + (persona.name || 'your Doomer') + '. vent to me about the trenches — i\'m here for the cope.' });
       return res.status(200).json({ ok: true });
     }
 
