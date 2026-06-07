@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>MOJAK AI · admin</title>
+<link rel="icon" href="assets/favicon.png"/>
+<link href="https://fonts.googleapis.com/css2?family=Boogaloo&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0b0614; --bg2:#120a22; --panel:#160c28; --panel2:#1d1138;
+  --mojak:#9d4dff; --mojak2:#7b2dff; --violet:#b985ff; --hot:#ff48c4; --acid:#c6ff4d;
+  --ink:#f3ecff; --dim:#9b86c9; --dim2:#6f6196; --line:rgba(157,77,255,.22); --line2:rgba(157,77,255,.4);
+  --radius:20px; --disp:'Boogaloo',cursive; --body:'Outfit',sans-serif; --mono:ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(120% 90% at 50% -10%,var(--bg2),var(--bg));color:var(--ink);font-family:var(--body);min-height:100vh;padding:22px 16px 60px}
+.wrap{max-width:760px;margin:0 auto}
+h1{font-family:var(--disp);font-size:34px;font-weight:400;letter-spacing:.5px}
+h1 .ai{color:var(--acid)}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.back{font-family:var(--mono);font-size:12px;color:var(--dim);text-decoration:none;border:1px solid var(--line);padding:7px 12px;border-radius:99px}
+.back:hover{color:var(--violet);border-color:var(--line2)}
+.gate{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:22px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.gate input{flex:1;min-width:180px;font-size:16px;padding:12px 14px;border-radius:13px;border:1px solid var(--line2);background:#120a22;color:var(--ink);font-family:var(--mono)}
+.btn{border:none;border-radius:13px;padding:12px 18px;font-weight:700;font-family:var(--body);cursor:pointer;font-size:14px;background:linear-gradient(135deg,var(--hot),var(--mojak));color:#fff}
+.btn.ghost{background:#160c28;border:1px solid var(--line2);color:var(--dim)}
+.err{color:var(--hot);font-size:13px;font-family:var(--mono);margin-top:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:18px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 18px 16px}
+.card .k{font-family:var(--mono);font-size:11px;color:var(--dim2);text-transform:uppercase;letter-spacing:1px}
+.card .v{font-family:var(--disp);font-size:30px;margin-top:4px}
+.card.rev .v{color:var(--acid)} .card.cost .v{color:var(--hot)} .card.marg .v{color:var(--violet)}
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:14px}
+.sec h2{font-family:var(--mono);font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.row{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}
+.row .d{font-family:var(--mono);color:var(--dim);width:84px;flex-shrink:0}
+.row .bar{flex:1;height:9px;background:#241334;border-radius:99px;overflow:hidden}
+.row .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--mojak),var(--acid));border-radius:99px}
+.row .n{font-family:var(--mono);font-size:12px;width:120px;text-align:right;flex-shrink:0}
+.row .n b{color:var(--acid)} .row .n s{color:var(--hot);text-decoration:none}
+.act{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;padding:6px 0;border-bottom:1px solid var(--line)}
+.act:last-child{border:none}.act span:first-child{color:var(--dim)}.act b{color:var(--violet)}
+.hint{font-family:var(--mono);font-size:11px;color:var(--dim2);margin-top:14px;text-align:center}
+.muted{color:var(--dim2);font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>MOJAK <span class="ai">AI</span> · admin</h1>
+    <a class="back" href="https://ai.mojakcto.xyz">← app</a>
+  </div>
+
+  <div class="gate" id="gate">
+    <input id="key" type="password" placeholder="admin key" autocomplete="off"/>
+    <button class="btn" onclick="load()">view stats</button>
+    <button class="btn ghost" id="forget" style="display:none" onclick="forget()">forget key</button>
+    <div class="err" id="err" style="display:none;width:100%"></div>
+  </div>
+
+  <div id="out"></div>
+</div>
+
+<script>
+var $=function(id){return document.getElementById(id);};
+var usd=function(n){return '$'+(Number(n||0)).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});};
+var saved=localStorage.getItem('mojak_admin_key');
+if(saved){ $('key').value=saved; $('forget').style.display=''; }
+
+function forget(){ localStorage.removeItem('mojak_admin_key'); $('key').value=''; $('forget').style.display='none'; $('out').innerHTML=''; }
+
+async function load(){
+  var k=$('key').value.trim(); var e=$('err'); e.style.display='none';
+  if(!k){ e.textContent='enter your admin key'; e.style.display=''; return; }
+  $('out').innerHTML='<p class="muted" style="margin-top:16px">loading…</p>';
+  try{
+    var res=await fetch('/api/admin?key='+encodeURIComponent(k));
+    if(res.status===401||res.status===403){ $('out').innerHTML=''; e.textContent='wrong admin key'; e.style.display=''; return; }
+    if(!res.ok) throw new Error('http '+res.status);
+    var s=await res.json();
+    localStorage.setItem('mojak_admin_key',k); $('forget').style.display='';
+    render(s);
+  }catch(err){ $('out').innerHTML=''; e.textContent='failed: '+(err.message||err); e.style.display=''; }
+}
+
+function render(s){
+  var t=s.totals||{};
+  var html='<div class="grid">'
+    +'<div class="card rev"><div class="k">revenue</div><div class="v">'+usd(t.revenueUsd)+'</div></div>'
+    +'<div class="card cost"><div class="k">cost</div><div class="v">'+usd(t.costUsd)+'</div></div>'
+    +'<div class="card marg"><div class="k">margin</div><div class="v">'+usd(t.marginUsd)+'</div></div>'
+    +'<div class="card"><div class="k">total calls</div><div class="v">'+(t.calls||0).toLocaleString()+'</div></div>'
+  +'</div>';
+
+  var daily=(s.daily||[]).slice().reverse();
+  var max=Math.max(1,...daily.map(function(d){return Math.max(d.revenueUsd||0,d.costUsd||0);}));
+  html+='<div class="sec"><h2>last 7 days · revenue vs cost</h2>';
+  if(!daily.length||max<=1&&!daily.some(function(d){return d.revenueUsd;})) html+='<p class="muted">no activity yet</p>';
+  daily.forEach(function(d){
+    var label=d.day?(d.day.slice(4,6)+'/'+d.day.slice(6,8)):'—';
+    var rw=Math.round((d.revenueUsd||0)/max*100), cw=Math.round((d.costUsd||0)/max*100);
+    html+='<div class="row"><div class="d">'+label+'</div>'
+      +'<div class="bar"><i style="width:'+rw+'%"></i></div>'
+      +'<div class="n"><b>'+usd(d.revenueUsd)+'</b> · <s>'+usd(d.costUsd)+'</s></div></div>';
+  });
+  html+='</div>';
+
+  var acts=s.actions||{}; var keys=Object.keys(acts).sort(function(a,b){return acts[b]-acts[a];});
+  html+='<div class="sec"><h2>calls by action</h2>';
+  if(!keys.length) html+='<p class="muted">no calls tracked yet</p>';
+  keys.forEach(function(kk){ html+='<div class="act"><span>'+kk+'</span><b>'+acts[kk].toLocaleString()+'</b></div>'; });
+  html+='</div>';
+
+  html+='<p class="hint">revenue = MON top-ups spent · cost = model spend · margin = the part you keep</p>';
+  $('out').innerHTML=html;
+}
+
+if(saved) load();
+</script>
+</body>
+</html>
